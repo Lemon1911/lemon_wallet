@@ -1,0 +1,17 @@
+{
+  "@@locale": "en",
+  "appTitle": "Lemon'sPay",
+  "welcomeBack": "Welcome back",
+  "login": "Login",
+  "register": "Register",
+  "email": "Email",
+  "password": "Password",
+  "totalBalance": "Total Balance",
+  "monthlyIncome": "Monthly Income",
+  "recentTransactions": "Recent Transactions",
+  "addExpense": "Add Expense",
+  "addIncome": "Add Income",
+  "settings": "Settings",
+  "theme": "Theme",
+  "language": "Language"
+}

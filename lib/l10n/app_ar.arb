@@ -1,0 +1,17 @@
+{
+  "@@locale": "ar",
+  "appTitle": "ليمون باي",
+  "welcomeBack": "مرحباً بك مجدداً",
+  "login": "تسجيل الدخول",
+  "register": "إنشاء حساب",
+  "email": "البريد الإلكتروني",
+  "password": "كلمة المرور",
+  "totalBalance": "إجمالي الرصيد",
+  "monthlyIncome": "الدخل الشهري",
+  "recentTransactions": "أحدث المعاملات",
+  "addExpense": "إضافة مصروف",
+  "addIncome": "إضافة دخل",
+  "settings": "الإعدادات",
+  "theme": "المظهر",
+  "language": "اللغة"
+}
