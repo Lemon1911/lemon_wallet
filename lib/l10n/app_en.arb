@@ -16,6 +16,14 @@
   "@register": {
     "description": "Register button text"
   },
+  "dontHaveAccount": "Don't have an account? Register",
+  "@dontHaveAccount": {
+    "description": "Text to link to registration screen"
+  },
+  "alreadyHaveAccount": "Already have an account? Login",
+  "@alreadyHaveAccount": {
+    "description": "Text to link to login screen"
+  },
   "fullName": "Full Name",
   "@fullName": {
     "description": "Label for full name input field"

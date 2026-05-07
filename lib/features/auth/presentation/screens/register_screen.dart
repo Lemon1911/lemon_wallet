@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
+import 'package:lemons_pay/core/router/app_router.dart';
 import 'package:lemons_pay/core/widgets/custom_components.dart';
 import 'package:lemons_pay/core/theme/app_colors.dart';
 import 'package:lemons_pay/features/auth/presentation/bloc/auth_bloc.dart';
@@ -107,6 +109,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             },
                           );
                         },
+                      ),
+                      const SizedBox(height: 16),
+                      TextButton(
+                        onPressed: () => context.pop(),
+                        child: Text(
+                          l10n.alreadyHaveAccount,
+                          style: const TextStyle(color: AppColors.primary),
+                        ),
                       ),
                     ],
                   ),

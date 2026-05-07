@@ -21,6 +21,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get register => 'Register';
 
   @override
+  String get dontHaveAccount => 'Don\'t have an account? Register';
+
+  @override
+  String get alreadyHaveAccount => 'Already have an account? Login';
+
+  @override
   String get fullName => 'Full Name';
 
   @override

@@ -21,6 +21,12 @@ class AppLocalizationsAr extends AppLocalizations {
   String get register => 'إنشاء حساب';
 
   @override
+  String get dontHaveAccount => 'ليس لديك حساب؟ سجل الآن';
+
+  @override
+  String get alreadyHaveAccount => 'لديك حساب بالفعل؟ سجل دخول';
+
+  @override
   String get fullName => 'الاسم الكامل';
 
   @override

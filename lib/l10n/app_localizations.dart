@@ -122,6 +122,18 @@ abstract class AppLocalizations {
   /// **'Register'**
   String get register;
 
+  /// Text to link to registration screen
+  ///
+  /// In en, this message translates to:
+  /// **'Don\'t have an account? Register'**
+  String get dontHaveAccount;
+
+  /// Text to link to login screen
+  ///
+  /// In en, this message translates to:
+  /// **'Already have an account? Login'**
+  String get alreadyHaveAccount;
+
   /// Label for full name input field
   ///
   /// In en, this message translates to:

@@ -16,6 +16,14 @@
   "@register": {
     "description": "نص زر التسجيل"
   },
+  "dontHaveAccount": "ليس لديك حساب؟ سجل الآن",
+  "@dontHaveAccount": {
+    "description": "نص للانتقال لشاشة التسجيل"
+  },
+  "alreadyHaveAccount": "لديك حساب بالفعل؟ سجل دخول",
+  "@alreadyHaveAccount": {
+    "description": "نص للانتقال لشاشة تسجيل الدخول"
+  },
   "fullName": "الاسم الكامل",
   "@fullName": {
     "description": "تسمية حقل الاسم الكامل"
