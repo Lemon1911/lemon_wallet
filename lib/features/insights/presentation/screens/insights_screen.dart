@@ -6,6 +6,9 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../features/transactions/presentation/bloc/transaction_bloc.dart';
 import '../../../../features/transactions/presentation/bloc/transaction_state.dart';
 import '../../../../features/transactions/domain/entities/transaction_entity.dart';
+import '../../domain/services/insights_service.dart';
+import 'package:flutter_animate/flutter_animate.dart';
+import '../../../../core/widgets/custom_components.dart';
 
 class InsightsScreen extends StatelessWidget {
   const InsightsScreen({super.key});
@@ -57,6 +60,10 @@ class InsightsScreen extends StatelessWidget {
                 _buildSectionHeader('Spending by Category'),
                 const SizedBox(height: 16),
                 _buildCategoryPieChart(expenses),
+                const SizedBox(height: 32),
+                _buildSectionHeader('AI Recommendations'),
+                const SizedBox(height: 16),
+                _buildAiTips(transactions),
                 const SizedBox(height: 32),
                 _buildSectionHeader('Monthly Trend'),
                 const SizedBox(height: 16),
@@ -271,6 +278,33 @@ class InsightsScreen extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Widget _buildAiTips(List<TransactionEntity> transactions) {
+    final tips = InsightsService.generateTips(transactions);
+    return Column(
+      children: tips.map((tip) => Padding(
+        padding: const EdgeInsets.only(bottom: 12),
+        child: GlassCard(
+          padding: const EdgeInsets.all(16),
+          borderColor: AppColors.primary.withValues(alpha: 0.3),
+          child: Row(
+            children: [
+              const Icon(Icons.auto_awesome, color: AppColors.primary, size: 24)
+                  .animate(onPlay: (controller) => controller.repeat())
+                  .shimmer(duration: 2.seconds, color: Colors.white.withValues(alpha: 0.2)),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Text(
+                  tip,
+                  style: const TextStyle(color: Colors.white, fontSize: 14, height: 1.4),
+                ),
+              ),
+            ],
+          ),
+        ),
+      )).toList(),
+    ).animate().fadeIn(delay: 500.ms).slideX(begin: 0.1, end: 0);
   }
 
   Color _getChartColor(int index) {
