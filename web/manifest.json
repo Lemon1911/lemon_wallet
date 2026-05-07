@@ -1,6 +1,6 @@
 {
-    "name": "lemons_pay",
-    "short_name": "lemons_pay",
+    "name": "LemonWallet",
+    "short_name": "LemonWallet",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

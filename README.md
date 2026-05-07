@@ -1,4 +1,4 @@
-# lemons_pay
+# LemonWallet
 
 A new Flutter project.
 
