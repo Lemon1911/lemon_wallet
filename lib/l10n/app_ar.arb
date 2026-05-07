@@ -1,17 +1,63 @@
 {
   "@@locale": "ar",
   "appTitle": "ليمون باي",
+  "@appTitle": {
+    "description": "عنوان التطبيق"
+  },
   "welcomeBack": "مرحباً بك مجدداً",
+  "@welcomeBack": {
+    "description": "رسالة ترحيب"
+  },
   "login": "تسجيل الدخول",
+  "@login": {
+    "description": "نص زر تسجيل الدخول"
+  },
   "register": "إنشاء حساب",
+  "@register": {
+    "description": "نص زر التسجيل"
+  },
+  "fullName": "الاسم الكامل",
+  "@fullName": {
+    "description": "تسمية حقل الاسم الكامل"
+  },
   "email": "البريد الإلكتروني",
+  "@email": {
+    "description": "تسمية حقل البريد الإلكتروني"
+  },
   "password": "كلمة المرور",
+  "@password": {
+    "description": "تسمية حقل كلمة المرور"
+  },
   "totalBalance": "إجمالي الرصيد",
+  "@totalBalance": {
+    "description": "تسمية إجمالي الرصيد"
+  },
   "monthlyIncome": "الدخل الشهري",
+  "@monthlyIncome": {
+    "description": "تسمية الدخل الشهري"
+  },
   "recentTransactions": "أحدث المعاملات",
+  "@recentTransactions": {
+    "description": "تسمية قائمة أحدث المعاملات"
+  },
   "addExpense": "إضافة مصروف",
+  "@addExpense": {
+    "description": "زر إضافة مصروف"
+  },
   "addIncome": "إضافة دخل",
+  "@addIncome": {
+    "description": "زر إضافة دخل"
+  },
   "settings": "الإعدادات",
+  "@settings": {
+    "description": "عنصر القائمة للإعدادات"
+  },
   "theme": "المظهر",
-  "language": "اللغة"
+  "@theme": {
+    "description": "عنصر مظهر المظهر"
+  },
+  "language": "اللغة",
+  "@language": {
+    "description": "عنصر إعدادات اللغة"
+  }
 }

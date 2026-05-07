@@ -66,7 +66,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       const SizedBox(height: 48),
                       CustomTextField(
                         controller: _nameController,
-                        labelText: 'Full Name', // TODO: Add to l10n
+                        labelText: l10n.fullName,
                         prefixIcon: Icons.person_outline,
                         validator: (value) =>
                             value!.isEmpty ? 'Please enter your name' : null,

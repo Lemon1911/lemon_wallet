@@ -1,17 +1,63 @@
 {
   "@@locale": "en",
   "appTitle": "Lemon'sPay",
+  "@appTitle": {
+    "description": "The title of the application"
+  },
   "welcomeBack": "Welcome back",
+  "@welcomeBack": {
+    "description": "Greeting message"
+  },
   "login": "Login",
+  "@login": {
+    "description": "Login button text"
+  },
   "register": "Register",
+  "@register": {
+    "description": "Register button text"
+  },
+  "fullName": "Full Name",
+  "@fullName": {
+    "description": "Label for full name input field"
+  },
   "email": "Email",
+  "@email": {
+    "description": "Label for email input field"
+  },
   "password": "Password",
+  "@password": {
+    "description": "Label for password input field"
+  },
   "totalBalance": "Total Balance",
+  "@totalBalance": {
+    "description": "Label for total balance"
+  },
   "monthlyIncome": "Monthly Income",
+  "@monthlyIncome": {
+    "description": "Label for monthly income"
+  },
   "recentTransactions": "Recent Transactions",
+  "@recentTransactions": {
+    "description": "Label for recent transactions list"
+  },
   "addExpense": "Add Expense",
+  "@addExpense": {
+    "description": "Button to add expense"
+  },
   "addIncome": "Add Income",
+  "@addIncome": {
+    "description": "Button to add income"
+  },
   "settings": "Settings",
+  "@settings": {
+    "description": "Settings menu item"
+  },
   "theme": "Theme",
-  "language": "Language"
+  "@theme": {
+    "description": "Theme settings item"
+  },
+  "language": "Language",
+  "@language": {
+    "description": "Language settings item"
+  }
 }

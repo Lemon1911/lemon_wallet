@@ -21,6 +21,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get register => 'إنشاء حساب';
 
   @override
+  String get fullName => 'الاسم الكامل';
+
+  @override
   String get email => 'البريد الإلكتروني';
 
   @override

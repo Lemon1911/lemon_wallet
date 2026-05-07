@@ -98,85 +98,91 @@ abstract class AppLocalizations {
     Locale('en'),
   ];
 
-  /// No description provided for @appTitle.
+  /// The title of the application
   ///
   /// In en, this message translates to:
   /// **'Lemon\'sPay'**
   String get appTitle;
 
-  /// No description provided for @welcomeBack.
+  /// Greeting message
   ///
   /// In en, this message translates to:
   /// **'Welcome back'**
   String get welcomeBack;
 
-  /// No description provided for @login.
+  /// Login button text
   ///
   /// In en, this message translates to:
   /// **'Login'**
   String get login;
 
-  /// No description provided for @register.
+  /// Register button text
   ///
   /// In en, this message translates to:
   /// **'Register'**
   String get register;
 
-  /// No description provided for @email.
+  /// Label for full name input field
+  ///
+  /// In en, this message translates to:
+  /// **'Full Name'**
+  String get fullName;
+
+  /// Label for email input field
   ///
   /// In en, this message translates to:
   /// **'Email'**
   String get email;
 
-  /// No description provided for @password.
+  /// Label for password input field
   ///
   /// In en, this message translates to:
   /// **'Password'**
   String get password;
 
-  /// No description provided for @totalBalance.
+  /// Label for total balance
   ///
   /// In en, this message translates to:
   /// **'Total Balance'**
   String get totalBalance;
 
-  /// No description provided for @monthlyIncome.
+  /// Label for monthly income
   ///
   /// In en, this message translates to:
   /// **'Monthly Income'**
   String get monthlyIncome;
 
-  /// No description provided for @recentTransactions.
+  /// Label for recent transactions list
   ///
   /// In en, this message translates to:
   /// **'Recent Transactions'**
   String get recentTransactions;
 
-  /// No description provided for @addExpense.
+  /// Button to add expense
   ///
   /// In en, this message translates to:
   /// **'Add Expense'**
   String get addExpense;
 
-  /// No description provided for @addIncome.
+  /// Button to add income
   ///
   /// In en, this message translates to:
   /// **'Add Income'**
   String get addIncome;
 
-  /// No description provided for @settings.
+  /// Settings menu item
   ///
   /// In en, this message translates to:
   /// **'Settings'**
   String get settings;
 
-  /// No description provided for @theme.
+  /// Theme settings item
   ///
   /// In en, this message translates to:
   /// **'Theme'**
   String get theme;
 
-  /// No description provided for @language.
+  /// Language settings item
   ///
   /// In en, this message translates to:
   /// **'Language'**
