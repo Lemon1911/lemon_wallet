@@ -104,7 +104,7 @@ class ProfileScreen extends StatelessWidget {
                     _buildGlassTile(
                       icon: Icons.person_outline,
                       title: 'Edit Profile',
-                      onTap: () {},
+                      onTap: () => context.push(AppRouter.editProfile),
                     ),
                     _buildGlassTile(
                       icon: Icons.notifications_none,

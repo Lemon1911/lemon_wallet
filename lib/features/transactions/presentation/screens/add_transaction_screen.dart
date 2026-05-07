@@ -9,6 +9,7 @@ import '../bloc/transaction_bloc.dart';
 import '../bloc/transaction_event.dart';
 import '../bloc/transaction_state.dart';
 import '../../../wallet/presentation/bloc/wallet_bloc.dart';
+import '../../../../core/utils/icon_helper.dart';
 
 class AddTransactionScreen extends StatefulWidget {
   final String walletId;
@@ -197,7 +198,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(_getIconData(cat.icon), color: isSelected ? AppColors.primary : Colors.white70, size: 18),
+                      Icon(IconHelper.getIconData(cat.icon), color: isSelected ? AppColors.primary : Colors.white70, size: 18),
                       const SizedBox(width: 8),
                       Text(cat.name, style: TextStyle(color: isSelected ? AppColors.primary : Colors.white70, fontSize: 14)),
                     ],
@@ -268,16 +269,6 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
     );
   }
 
-  IconData _getIconData(String iconName) {
-    switch (iconName) {
-      case 'fastfood': return Icons.fastfood_rounded;
-      case 'shopping_bag': return Icons.shopping_bag_rounded;
-      case 'directions_car': return Icons.directions_car_rounded;
-      case 'home': return Icons.home_rounded;
-      case 'movie': return Icons.movie_rounded;
-      case 'payments': return Icons.payments_rounded;
-      case 'trending_up': return Icons.trending_up_rounded;
-      default: return Icons.category_rounded;
-    }
-  }
+  // Icon mapping moved to IconHelper
+
 }

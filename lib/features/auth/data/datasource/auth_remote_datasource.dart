@@ -13,6 +13,7 @@ abstract class AuthRemoteDataSource {
   Future<void> logout();
 
   Future<UserModel?> getCurrentUser();
+  Future<UserModel> updateProfile({String? fullName, String? avatarUrl});
 }
 
 class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
@@ -96,6 +97,35 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       id: user.id,
       email: user.email!,
       fullName: user.userMetadata?['full_name'] as String?,
+    );
+  }
+
+  @override
+  Future<UserModel> updateProfile({String? fullName, String? avatarUrl}) async {
+    final Map<String, dynamic> data = {};
+    if (fullName != null) data['full_name'] = fullName;
+    if (avatarUrl != null) data['avatar_url'] = avatarUrl;
+
+    final response = await supabaseClient.auth.updateUser(
+      UserAttributes(data: data),
+    );
+
+    if (response.user == null) {
+      throw Exception('Update failed: User is null');
+    }
+
+    // Sync to public.users table
+    final Map<String, dynamic> publicData = {'id': response.user!.id};
+    if (fullName != null) publicData['full_name'] = fullName;
+    if (avatarUrl != null) publicData['avatar_url'] = avatarUrl;
+
+    await supabaseClient.from('users').upsert(publicData);
+
+    return UserModel(
+      id: response.user!.id,
+      email: response.user!.email!,
+      fullName: response.user!.userMetadata?['full_name'] as String?,
+      avatarUrl: response.user!.userMetadata?['avatar_url'] as String?,
     );
   }
 }

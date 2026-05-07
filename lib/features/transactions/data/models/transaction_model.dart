@@ -33,6 +33,7 @@ class TransactionModel extends TransactionEntity {
 
   Map<String, dynamic> toJson() {
     return {
+      'id': id,
       'wallet_id': walletId,
       'category_id': categoryId,
       'user_id': userId,
@@ -41,6 +42,7 @@ class TransactionModel extends TransactionEntity {
       'note': note,
       'receipt_url': receiptUrl,
       'transaction_date': transactionDate.toIso8601String(),
+      'created_at': createdAt.toIso8601String(),
     };
   }
 }

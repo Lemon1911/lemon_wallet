@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../../core/utils/csv_helper.dart';
+import '../../../../core/utils/icon_helper.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/custom_components.dart';
 import '../../../wallet/presentation/bloc/wallet_bloc.dart';
@@ -63,7 +65,7 @@ class TransactionsScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildHeader(),
+              _buildHeader(transactions),
               const SizedBox(height: 24),
               _buildSearchBar(),
               const SizedBox(height: 32),
@@ -73,7 +75,7 @@ class TransactionsScreen extends StatelessWidget {
                   orElse: () => const CategoryEntity(id: '', name: 'Transaction', type: '', icon: 'default'),
                 );
                 return _buildTransactionItem(
-                  icon: _getIconData(category.icon),
+                  icon: IconHelper.getIconData(category.icon),
                   title: tx.note.isEmpty ? category.name : tx.note,
                   time: '${tx.transactionDate.day}/${tx.transactionDate.month}',
                   amount: '${tx.type == TransactionType.income ? '+' : '-'} \$${tx.amount.toStringAsFixed(2)}',
@@ -87,20 +89,10 @@ class TransactionsScreen extends StatelessWidget {
     );
   }
 
-  IconData _getIconData(String iconName) {
-    switch (iconName) {
-      case 'fastfood': return Icons.fastfood_rounded;
-      case 'shopping_bag': return Icons.shopping_bag_rounded;
-      case 'directions_car': return Icons.directions_car_rounded;
-      case 'home': return Icons.home_rounded;
-      case 'movie': return Icons.movie_rounded;
-      case 'payments': return Icons.payments_rounded;
-      case 'trending_up': return Icons.trending_up_rounded;
-      default: return Icons.category_rounded;
-    }
-  }
+  // Icon mapping moved to IconHelper
 
-  Widget _buildHeader() {
+
+  Widget _buildHeader(List<TransactionEntity> transactions) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -113,14 +105,23 @@ class TransactionsScreen extends StatelessWidget {
             letterSpacing: -0.5,
           ),
         ),
-        GlassCard(
-          padding: const EdgeInsets.all(10),
-          borderRadius: BorderRadius.circular(12),
-          child: const Icon(
-            Icons.filter_list_rounded,
-            color: Colors.white,
-            size: 20,
-          ),
+        Row(
+          children: [
+            IconButton(
+              icon: const Icon(Icons.ios_share_rounded, color: AppColors.primary),
+              onPressed: () => CsvHelper.exportTransactionsToCsv(transactions),
+            ),
+            const SizedBox(width: 8),
+            GlassCard(
+              padding: const EdgeInsets.all(10),
+              borderRadius: BorderRadius.circular(12),
+              child: const Icon(
+                Icons.filter_list_rounded,
+                color: Colors.white,
+                size: 20,
+              ),
+            ),
+          ],
         ),
       ],
     ).animate().fadeIn(duration: 600.ms).slideY(begin: -0.2, end: 0);

@@ -22,6 +22,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<AuthRegisterRequested>(_onRegisterRequested);
     on<AuthLogoutRequested>(_onLogoutRequested);
     on<AuthCheckStatus>(_onCheckStatus);
+    on<UpdateProfileRequested>(_onUpdateProfileRequested);
   }
 
   Future<void> _onLoginRequested(
@@ -75,5 +76,24 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         emit(AuthUnauthenticated());
       }
     });
+  }
+
+  Future<void> _onUpdateProfileRequested(
+    UpdateProfileRequested event,
+    Emitter<AuthState> emit,
+  ) async {
+    final currentState = state;
+    if (currentState is AuthAuthenticated) {
+      // Keep existing user data while updating
+      final result = await _repository.updateProfile(
+        fullName: event.fullName,
+        avatarUrl: event.avatarUrl,
+      );
+      
+      result.fold(
+        (failure) => emit(AuthError(failure)),
+        (user) => emit(AuthAuthenticated(user)),
+      );
+    }
   }
 }

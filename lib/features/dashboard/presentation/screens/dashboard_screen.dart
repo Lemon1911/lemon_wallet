@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import '../../../../core/utils/icon_helper.dart';
 import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/custom_components.dart';
@@ -223,9 +224,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(
-              color: AppColors.primary.withOpacity(0.1),
+              color: AppColors.primary.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: AppColors.primary.withOpacity(0.2)),
+              border: Border.all(color: AppColors.primary.withValues(alpha: 0.2)),
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
@@ -252,7 +253,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             Text(
               selectedWallet.currency == 'USD' ? '\$' : selectedWallet.currency,
               style: TextStyle(
-                color: AppColors.primary.withOpacity(0.7),
+                color: AppColors.primary.withValues(alpha: 0.7),
                 fontSize: 24,
                 fontWeight: FontWeight.w600,
                 height: 1.5,
@@ -325,7 +326,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                               Container(
                                 padding: const EdgeInsets.all(10),
                                 decoration: BoxDecoration(
-                                  color: AppColors.primary.withOpacity(0.1),
+                                  color: AppColors.primary.withValues(alpha: 0.1),
                                   shape: BoxShape.circle,
                                 ),
                                 child: Icon(
@@ -474,8 +475,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
                     colors: [
-                      AppColors.primary.withOpacity(0.8),
-                      AppColors.primary.withOpacity(0.1),
+                      AppColors.primary.withValues(alpha: 0.2),
+                      AppColors.primary.withValues(alpha: 0.1),
                     ],
                   ),
                   borderRadius: BorderRadius.circular(8),
@@ -527,7 +528,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           );
           
           return _ActivityItem(
-            icon: _getIconData(category.icon),
+            icon: IconHelper.getIconData(category.icon),
             title: tx.note.isEmpty ? category.name : tx.note,
             subtitle: '${tx.transactionDate.day}/${tx.transactionDate.month}/${tx.transactionDate.year}',
             amount: '${tx.type == TransactionType.income ? '+' : '-'} \$${tx.amount.toStringAsFixed(2)}',
@@ -538,18 +539,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
     ).animate().fadeIn(delay: 800.ms, duration: 800.ms);
   }
 
-  IconData _getIconData(String iconName) {
-    switch (iconName) {
-      case 'fastfood': return Icons.fastfood_rounded;
-      case 'shopping_bag': return Icons.shopping_bag_rounded;
-      case 'directions_car': return Icons.directions_car_rounded;
-      case 'home': return Icons.home_rounded;
-      case 'movie': return Icons.movie_rounded;
-      case 'payments': return Icons.payments_rounded;
-      case 'trending_up': return Icons.trending_up_rounded;
-      default: return Icons.category_rounded;
-    }
-  }
+  // Icon mapping moved to IconHelper
+
 }
 
 class _ActionPill extends StatelessWidget {

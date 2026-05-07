@@ -49,10 +49,17 @@ dependencies:
   equatable: ^2.0.8
   dartz: ^0.10.1
   flutter_animate: ^4.5.2
+  sqflite: ^2.4.2+1
+  path: ^1.9.1
+  path_provider: ^2.1.5
+  shared_preferences: ^2.5.5
+  csv: ^8.0.0
+  share_plus: ^12.0.2
 
-  flutter_driver: any
 dev_dependencies:
   flutter_test:
+    sdk: flutter
+  flutter_driver:
     sdk: flutter
   flutter_lints: ^6.0.0
 

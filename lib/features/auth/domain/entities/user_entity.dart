@@ -13,6 +13,18 @@ class UserEntity extends Equatable {
     this.avatarUrl,
   });
 
+  UserEntity copyWith({
+    String? fullName,
+    String? avatarUrl,
+  }) {
+    return UserEntity(
+      id: id,
+      email: email,
+      fullName: fullName ?? this.fullName,
+      avatarUrl: avatarUrl ?? this.avatarUrl,
+    );
+  }
+
   @override
   List<Object?> get props => [id, email, fullName, avatarUrl];
 }

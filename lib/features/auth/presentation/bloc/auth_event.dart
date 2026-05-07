@@ -35,3 +35,13 @@ class AuthRegisterRequested extends AuthEvent {
 class AuthLogoutRequested extends AuthEvent {}
 
 class AuthCheckStatus extends AuthEvent {}
+
+class UpdateProfileRequested extends AuthEvent {
+  final String? fullName;
+  final String? avatarUrl;
+
+  const UpdateProfileRequested({this.fullName, this.avatarUrl});
+
+  @override
+  List<Object?> get props => [fullName, avatarUrl];
+}

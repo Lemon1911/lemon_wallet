@@ -8,6 +8,7 @@ import '../../features/wallet/presentation/screens/create_wallet_screen.dart';
 import '../../features/transactions/presentation/screens/add_transaction_screen.dart';
 
 import '../../features/scanner/presentation/screens/scanner_screen.dart';
+import '../../features/profile/presentation/screens/edit_profile_screen.dart';
 
 class AppRouter {
   static const String login = '/login';
@@ -16,6 +17,7 @@ class AppRouter {
   static const String createWallet = '/create-wallet';
   static const String addTransaction = '/add-transaction';
   static const String scanner = '/scanner';
+  static const String editProfile = '/edit-profile';
 
   static final router = GoRouter(
     initialLocation: login,
@@ -52,6 +54,10 @@ class AppRouter {
           final walletId = state.extra as String;
           return ScannerScreen(walletId: walletId);
         },
+      ),
+      GoRoute(
+        path: editProfile,
+        builder: (context, state) => const EditProfileScreen(),
       ),
     ],
   );

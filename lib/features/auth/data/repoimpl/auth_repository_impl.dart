@@ -53,6 +53,22 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
+  Future<Either<String, UserEntity>> updateProfile({
+    String? fullName,
+    String? avatarUrl,
+  }) async {
+    try {
+      final user = await remoteDataSource.updateProfile(
+        fullName: fullName,
+        avatarUrl: avatarUrl,
+      );
+      return Right(user);
+    } catch (e) {
+      return Left(e.toString());
+    }
+  }
+
+  @override
   Future<Either<String, UserEntity?>> getCurrentUser() async {
     try {
       final user = await remoteDataSource.getCurrentUser();

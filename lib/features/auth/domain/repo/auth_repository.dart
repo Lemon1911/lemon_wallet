@@ -15,5 +15,10 @@ abstract class AuthRepository {
 
   Future<void> logout();
 
+  Future<Either<String, UserEntity>> updateProfile({
+    String? fullName,
+    String? avatarUrl,
+  });
+
   Future<Either<String, UserEntity?>> getCurrentUser();
 }

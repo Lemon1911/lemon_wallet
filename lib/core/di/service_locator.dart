@@ -20,32 +20,35 @@ import '../../features/scanner/domain/repo/scanner_repository.dart';
 import '../../features/scanner/data/repoimpl/scanner_repository_impl.dart';
 import '../../features/scanner/presentation/bloc/scanner_bloc.dart';
 import '../services/biometric_service.dart';
+import '../../features/transactions/data/datasource/transaction_local_datasource.dart';
+import '../../features/wallet/data/datasource/wallet_local_datasource.dart';
+import '../database/database_helper.dart';
+
+import '../theme/theme_bloc.dart';
+import '../theme/theme_service.dart';
+
 final sl = GetIt.instance;
 
 Future<void> init() async {
+  // Database & Cache
+  sl.registerLazySingleton(() => DatabaseHelper());
+  sl.registerLazySingleton(() => ThemeService());
+
   // Services
   sl.registerLazySingleton(() => BiometricService());
 
-  // Features - Auth
+  // Features - Theme
+  sl.registerFactory(() => ThemeBloc(themeService: sl()));
 
-  // Bloc
+  // Features - Auth
   sl.registerFactory(
     () => AuthBloc(loginUseCase: sl(), registerUseCase: sl(), repository: sl()),
   );
-
-  // Use cases
   sl.registerLazySingleton(() => LoginUseCase(sl()));
   sl.registerLazySingleton(() => RegisterUseCase(sl()));
-
-  // Repository
   sl.registerLazySingleton<AuthRepository>(() => AuthRepositoryImpl(sl()));
-
-  // Data sources
   sl.registerLazySingleton<AuthRemoteDataSource>(
     () => AuthRemoteDataSourceImpl(sl()),
-  );
-  sl.registerLazySingleton<TransactionRemoteDataSource>(
-    () => TransactionRemoteDataSourceImpl(sl()),
   );
 
   // Features - Transactions
@@ -58,7 +61,13 @@ Future<void> init() async {
   sl.registerLazySingleton(() => GetTransactionsUseCase(sl()));
   sl.registerLazySingleton(() => GetCategoriesUseCase(sl()));
   sl.registerLazySingleton<TransactionRepository>(
-    () => TransactionRepositoryImpl(sl()),
+    () => TransactionRepositoryImpl(sl(), sl()),
+  );
+  sl.registerLazySingleton<TransactionRemoteDataSource>(
+    () => TransactionRemoteDataSourceImpl(sl()),
+  );
+  sl.registerLazySingleton<TransactionLocalDataSource>(
+    () => TransactionLocalDataSourceImpl(sl()),
   );
 
   // Features - Wallets
@@ -69,10 +78,13 @@ Future<void> init() async {
   sl.registerLazySingleton(() => CreateWalletUseCase(sl()));
   sl.registerLazySingleton(() => GetWalletsUseCase(sl()));
   sl.registerLazySingleton<WalletRepository>(
-    () => WalletRepositoryImpl(sl()),
+    () => WalletRepositoryImpl(sl(), sl()),
   );
   sl.registerLazySingleton<WalletRemoteDataSource>(
     () => WalletRemoteDataSourceImpl(sl()),
+  );
+  sl.registerLazySingleton<WalletLocalDataSource>(
+    () => WalletLocalDataSourceImpl(sl()),
   );
 
   // Features - Scanner

@@ -16,4 +16,13 @@ class CategoryModel extends CategoryEntity {
       icon: json['icon'] as String,
     );
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'name': name,
+      'type': type,
+      'icon': icon,
+    };
+  }
 }
