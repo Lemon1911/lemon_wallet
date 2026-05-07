@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
 
@@ -84,6 +85,139 @@ class CustomButton extends StatelessWidget {
                   fontWeight: FontWeight.bold,
                 ),
               ),
+      ),
+    );
+  }
+}
+
+class GlassCard extends StatelessWidget {
+  final Widget child;
+  final double? width;
+  final double? height;
+  final EdgeInsetsGeometry? padding;
+  final BorderRadius? borderRadius;
+  final Color? borderColor;
+  final Color? fillColor;
+
+  const GlassCard({
+    super.key,
+    required this.child,
+    this.width,
+    this.height,
+    this.padding,
+    this.borderRadius,
+    this.borderColor,
+    this.fillColor,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final finalBorderRadius = borderRadius ?? BorderRadius.circular(24);
+    
+    return Container(
+      width: width,
+      height: height,
+      decoration: BoxDecoration(
+        borderRadius: finalBorderRadius,
+        border: Border.all(
+          color: borderColor ?? AppColors.glassBorder,
+          width: 1.5,
+        ),
+      ),
+      child: ClipRRect(
+        borderRadius: finalBorderRadius,
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
+          child: Container(
+            padding: padding ?? const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: fillColor ?? AppColors.glassFill,
+              borderRadius: finalBorderRadius,
+            ),
+            child: child,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class GlassBottomNavBar extends StatelessWidget {
+  final int currentIndex;
+  final Function(int) onTap;
+
+  const GlassBottomNavBar({
+    super.key,
+    required this.currentIndex,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 24, right: 24, bottom: 24),
+      child: GlassCard(
+        padding: EdgeInsets.zero,
+        borderRadius: BorderRadius.circular(50),
+        child: SizedBox(
+          height: 70,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              _NavBarItem(
+                icon: Icons.dashboard_rounded,
+                isActive: currentIndex == 0,
+                onTap: () => onTap(0),
+              ),
+              _NavBarItem(
+                icon: Icons.account_balance_wallet_rounded,
+                isActive: currentIndex == 1,
+                onTap: () => onTap(1),
+              ),
+              _NavBarItem(
+                icon: Icons.swap_horiz_rounded,
+                isActive: currentIndex == 2,
+                onTap: () => onTap(2),
+              ),
+              _NavBarItem(
+                icon: Icons.person_rounded,
+                isActive: currentIndex == 3,
+                onTap: () => onTap(3),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _NavBarItem extends StatelessWidget {
+  final IconData icon;
+  final bool isActive;
+  final VoidCallback onTap;
+
+  const _NavBarItem({
+    required this.icon,
+    required this.isActive,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: isActive ? AppColors.accent.withValues(alpha: 0.1) : Colors.transparent,
+          shape: BoxShape.circle,
+        ),
+        child: Icon(
+          icon,
+          color: isActive ? AppColors.primary : AppColors.textSecondaryDark,
+          size: 28,
+        ),
       ),
     );
   }

@@ -42,9 +42,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
           }
         },
         child: Container(
-          child: Container(
-            color: AppColors.bgDark, // Deep Midnight Blue background
-            child: SafeArea(
+          color: AppColors.bgDark, // Deep Midnight Blue background
+          child: SafeArea(
               child: Center(
                 child: SingleChildScrollView(
                   padding: const EdgeInsets.all(24.0),
@@ -176,7 +175,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       ],
                     ),
                   ),
-                ),
               ),
             ),
           ),
