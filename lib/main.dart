@@ -10,7 +10,6 @@ import 'features/auth/presentation/bloc/auth_bloc.dart';
 import 'features/auth/presentation/bloc/auth_event.dart';
 import 'features/wallet/presentation/bloc/wallet_bloc.dart';
 import 'features/transactions/presentation/bloc/transaction_bloc.dart';
-import 'features/transactions/presentation/bloc/transaction_event.dart';
 
 import 'core/di/service_locator.dart' as di;
 

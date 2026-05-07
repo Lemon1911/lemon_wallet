@@ -16,8 +16,10 @@ import '../../features/wallet/data/repoimpl/wallet_repository_impl.dart';
 import '../../features/wallet/domain/repo/wallet_repository.dart';
 import '../../features/wallet/domain/usecase/wallet_usecases.dart';
 import '../../features/wallet/presentation/bloc/wallet_bloc.dart';
+import '../../features/scanner/domain/repo/scanner_repository.dart';
+import '../../features/scanner/data/repoimpl/scanner_repository_impl.dart';
+import '../../features/scanner/presentation/bloc/scanner_bloc.dart';
 import '../services/biometric_service.dart';
-
 final sl = GetIt.instance;
 
 Future<void> init() async {
@@ -72,6 +74,10 @@ Future<void> init() async {
   sl.registerLazySingleton<WalletRemoteDataSource>(
     () => WalletRemoteDataSourceImpl(sl()),
   );
+
+  // Features - Scanner
+  sl.registerFactory(() => ScannerBloc(scannerRepository: sl()));
+  sl.registerLazySingleton<ScannerRepository>(() => ScannerRepositoryImpl());
 
   // External
   sl.registerLazySingleton(() => Supabase.instance.client);

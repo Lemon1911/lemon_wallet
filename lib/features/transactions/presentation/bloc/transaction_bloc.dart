@@ -1,4 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../domain/entities/category_entity.dart';
 import '../../domain/usecase/transaction_usecases.dart';
 import 'transaction_event.dart';
 import 'transaction_state.dart';
@@ -7,6 +8,8 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
   final GetTransactionsUseCase _getTransactionsUseCase;
   final AddTransactionUseCase _addTransactionUseCase;
   final GetCategoriesUseCase _getCategoriesUseCase;
+  
+  List<CategoryEntity>? _cachedCategories;
 
   TransactionBloc({
     required GetTransactionsUseCase getTransactionsUseCase,
@@ -29,7 +32,10 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
     final result = await _getCategoriesUseCase();
     result.fold(
       (failure) => emit(TransactionError(failure)),
-      (categories) => emit(CategoriesLoaded(categories)),
+      (categories) {
+        _cachedCategories = categories;
+        emit(CategoriesLoaded(categories));
+      },
     );
   }
 
@@ -38,10 +44,19 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
     Emitter<TransactionState> emit,
   ) async {
     emit(TransactionLoading());
+    
+    if (_cachedCategories == null || _cachedCategories!.isEmpty) {
+      final catResult = await _getCategoriesUseCase();
+      catResult.fold(
+        (_) {}, 
+        (categories) => _cachedCategories = categories,
+      );
+    }
+    
     final result = await _getTransactionsUseCase(walletId: event.walletId);
     result.fold(
       (failure) => emit(TransactionError(failure)),
-      (transactions) => emit(TransactionsLoaded(transactions)),
+      (transactions) => emit(TransactionsLoaded(transactions, _cachedCategories ?? [])),
     );
   }
 

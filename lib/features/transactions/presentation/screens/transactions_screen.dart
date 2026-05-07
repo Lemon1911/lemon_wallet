@@ -8,6 +8,7 @@ import '../bloc/transaction_bloc.dart';
 import '../bloc/transaction_event.dart';
 import '../bloc/transaction_state.dart';
 import '../../domain/entities/transaction_entity.dart';
+import '../../domain/entities/category_entity.dart';
 
 class TransactionsScreen extends StatelessWidget {
   const TransactionsScreen({super.key});
@@ -29,7 +30,7 @@ class TransactionsScreen extends StatelessWidget {
                 if (state.transactions.isEmpty) {
                   return _buildEmptyState();
                 }
-                return _buildTransactionList(state.transactions);
+                return _buildTransactionList(state.transactions, state.categories);
               }
               return const Center(child: Text('Load transactions...'));
             },
@@ -53,7 +54,7 @@ class TransactionsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildTransactionList(List<TransactionEntity> transactions) {
+  Widget _buildTransactionList(List<TransactionEntity> transactions, List<CategoryEntity> categories) {
     return Center(
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 800),
@@ -66,13 +67,19 @@ class TransactionsScreen extends StatelessWidget {
               const SizedBox(height: 24),
               _buildSearchBar(),
               const SizedBox(height: 32),
-              ...transactions.map((tx) => _buildTransactionItem(
-                icon: _getCategoryIcon(tx.categoryId), // Map category ID to icon later
-                title: tx.note.isEmpty ? 'Transaction' : tx.note,
-                time: '${tx.transactionDate.day}/${tx.transactionDate.month}',
-                amount: '${tx.type == TransactionType.income ? '+' : '-'} \$${tx.amount.toStringAsFixed(2)}',
-                isPositive: tx.type == TransactionType.income,
-              )),
+              ...transactions.map((tx) {
+                final category = categories.firstWhere(
+                  (c) => c.id == tx.categoryId,
+                  orElse: () => const CategoryEntity(id: '', name: 'Transaction', type: '', icon: 'default'),
+                );
+                return _buildTransactionItem(
+                  icon: _getIconData(category.icon),
+                  title: tx.note.isEmpty ? category.name : tx.note,
+                  time: '${tx.transactionDate.day}/${tx.transactionDate.month}',
+                  amount: '${tx.type == TransactionType.income ? '+' : '-'} \$${tx.amount.toStringAsFixed(2)}',
+                  isPositive: tx.type == TransactionType.income,
+                );
+              }),
             ],
           ),
         ),
@@ -80,9 +87,17 @@ class TransactionsScreen extends StatelessWidget {
     );
   }
 
-  IconData _getCategoryIcon(String categoryId) {
-    // This is a simplified mapping. In a real app, you'd fetch the category name/icon.
-    return Icons.category_rounded;
+  IconData _getIconData(String iconName) {
+    switch (iconName) {
+      case 'fastfood': return Icons.fastfood_rounded;
+      case 'shopping_bag': return Icons.shopping_bag_rounded;
+      case 'directions_car': return Icons.directions_car_rounded;
+      case 'home': return Icons.home_rounded;
+      case 'movie': return Icons.movie_rounded;
+      case 'payments': return Icons.payments_rounded;
+      case 'trending_up': return Icons.trending_up_rounded;
+      default: return Icons.category_rounded;
+    }
   }
 
   Widget _buildHeader() {
@@ -131,18 +146,6 @@ class TransactionsScreen extends StatelessWidget {
         .animate()
         .fadeIn(delay: 200.ms, duration: 600.ms)
         .scale(begin: const Offset(0.95, 0.95));
-  }
-
-  Widget _buildGroupHeader(String label) {
-    return Text(
-      label,
-      style: TextStyle(
-        color: AppColors.textSecondaryDark,
-        fontSize: 14,
-        fontWeight: FontWeight.bold,
-        letterSpacing: 1,
-      ),
-    ).animate().fadeIn(delay: 300.ms);
   }
 
   Widget _buildTransactionItem({

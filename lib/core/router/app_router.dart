@@ -7,12 +7,15 @@ import '../../features/wallet/presentation/screens/create_wallet_screen.dart';
 
 import '../../features/transactions/presentation/screens/add_transaction_screen.dart';
 
+import '../../features/scanner/presentation/screens/scanner_screen.dart';
+
 class AppRouter {
   static const String login = '/login';
   static const String register = '/register';
   static const String home = '/';
   static const String createWallet = '/create-wallet';
   static const String addTransaction = '/add-transaction';
+  static const String scanner = '/scanner';
 
   static final router = GoRouter(
     initialLocation: login,
@@ -30,8 +33,24 @@ class AppRouter {
       GoRoute(
         path: addTransaction,
         builder: (context, state) {
+          final extra = state.extra as Map<String, dynamic>;
+          final walletId = extra['walletId'] as String;
+          final initialType = extra['type'];
+          final initialAmount = extra['initialAmount'] as double?;
+          final initialNote = extra['initialNote'] as String?;
+          return AddTransactionScreen(
+            walletId: walletId, 
+            initialType: initialType,
+            initialAmount: initialAmount,
+            initialNote: initialNote,
+          );
+        },
+      ),
+      GoRoute(
+        path: scanner,
+        builder: (context, state) {
           final walletId = state.extra as String;
-          return AddTransactionScreen(walletId: walletId);
+          return ScannerScreen(walletId: walletId);
         },
       ),
     ],

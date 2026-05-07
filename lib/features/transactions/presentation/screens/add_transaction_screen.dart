@@ -8,10 +8,21 @@ import '../../domain/entities/category_entity.dart';
 import '../bloc/transaction_bloc.dart';
 import '../bloc/transaction_event.dart';
 import '../bloc/transaction_state.dart';
+import '../../../wallet/presentation/bloc/wallet_bloc.dart';
 
 class AddTransactionScreen extends StatefulWidget {
   final String walletId;
-  const AddTransactionScreen({super.key, required this.walletId});
+  final TransactionType? initialType;
+  final double? initialAmount;
+  final String? initialNote;
+  
+  const AddTransactionScreen({
+    super.key, 
+    required this.walletId,
+    this.initialType,
+    this.initialAmount,
+    this.initialNote,
+  });
 
   @override
   State<AddTransactionScreen> createState() => _AddTransactionScreenState();
@@ -20,13 +31,20 @@ class AddTransactionScreen extends StatefulWidget {
 class _AddTransactionScreenState extends State<AddTransactionScreen> {
   final _amountController = TextEditingController();
   final _noteController = TextEditingController();
-  TransactionType _type = TransactionType.expense;
+  late TransactionType _type;
   CategoryEntity? _selectedCategory;
   DateTime _selectedDate = DateTime.now();
 
   @override
   void initState() {
     super.initState();
+    _type = widget.initialType ?? TransactionType.expense;
+    if (widget.initialAmount != null) {
+      _amountController.text = widget.initialAmount.toString();
+    }
+    if (widget.initialNote != null) {
+      _noteController.text = widget.initialNote!;
+    }
     context.read<TransactionBloc>().add(LoadCategories());
   }
 
@@ -48,6 +66,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
           if (state is TransactionSuccess) {
             context.pop();
             context.read<TransactionBloc>().add(LoadTransactions(widget.walletId));
+            context.read<WalletBloc>().add(LoadWallets());
           } else if (state is TransactionError) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(content: Text(state.message)),
