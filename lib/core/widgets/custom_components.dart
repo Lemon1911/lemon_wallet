@@ -226,9 +226,14 @@ class GlassBottomNavBar extends StatelessWidget {
                 onTap: () => onTap(2),
               ),
               _NavBarItem(
-                icon: Icons.person_rounded,
+                icon: Icons.bar_chart_rounded,
                 isActive: currentIndex == 3,
                 onTap: () => onTap(3),
+              ),
+              _NavBarItem(
+                icon: Icons.person_rounded,
+                isActive: currentIndex == 4,
+                onTap: () => onTap(4),
               ),
             ],
           ),
@@ -314,9 +319,15 @@ class GlassSideNavBar extends StatelessWidget {
                   ),
                   const SizedBox(height: 24),
                   _NavBarItem(
-                    icon: Icons.person_rounded,
+                    icon: Icons.bar_chart_rounded,
                     isActive: currentIndex == 3,
                     onTap: () => onTap(3),
+                  ),
+                  const SizedBox(height: 24),
+                  _NavBarItem(
+                    icon: Icons.person_rounded,
+                    isActive: currentIndex == 4,
+                    onTap: () => onTap(4),
                   ),
                 ],
               ),

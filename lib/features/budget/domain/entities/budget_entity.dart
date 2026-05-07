@@ -2,6 +2,7 @@ import 'package:equatable/equatable.dart';
 
 class BudgetEntity extends Equatable {
   final String id;
+  final String userId;
   final String categoryId;
   final double amountLimit;
   final String period; // e.g., 'monthly'
@@ -9,6 +10,7 @@ class BudgetEntity extends Equatable {
 
   const BudgetEntity({
     required this.id,
+    required this.userId,
     required this.categoryId,
     required this.amountLimit,
     required this.period,
@@ -16,5 +18,5 @@ class BudgetEntity extends Equatable {
   });
 
   @override
-  List<Object?> get props => [id, categoryId, amountLimit, period, startDate];
+  List<Object?> get props => [id, userId, categoryId, amountLimit, period, startDate];
 }

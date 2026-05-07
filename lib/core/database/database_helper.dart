@@ -70,6 +70,7 @@ class DatabaseHelper {
     await db.execute('''
       CREATE TABLE budgets (
         id TEXT PRIMARY KEY,
+        user_id TEXT,
         category_id TEXT,
         amount_limit REAL,
         period TEXT,
@@ -84,5 +85,6 @@ class DatabaseHelper {
     await db.delete('transactions');
     await db.delete('categories');
     await db.delete('wallets');
+    await db.delete('budgets');
   }
 }

@@ -5,6 +5,7 @@ import 'dashboard_screen.dart';
 import '../../../../features/wallet/presentation/screens/wallet_screen.dart';
 import '../../../../features/transactions/presentation/screens/transactions_screen.dart';
 import '../../../../features/profile/presentation/screens/profile_screen.dart';
+import '../../../../features/insights/presentation/screens/insights_screen.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -20,6 +21,7 @@ class _MainScreenState extends State<MainScreen> {
     const DashboardScreen(),
     const WalletScreen(),
     const TransactionsScreen(),
+    const InsightsScreen(),
     const ProfileScreen(),
   ];
 

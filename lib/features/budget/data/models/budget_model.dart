@@ -3,6 +3,7 @@ import '../../domain/entities/budget_entity.dart';
 class BudgetModel extends BudgetEntity {
   const BudgetModel({
     required super.id,
+    required super.userId,
     required super.categoryId,
     required super.amountLimit,
     required super.period,
@@ -12,6 +13,7 @@ class BudgetModel extends BudgetEntity {
   factory BudgetModel.fromJson(Map<String, dynamic> json) {
     return BudgetModel(
       id: json['id'],
+      userId: json['user_id'] ?? '',
       categoryId: json['category_id'],
       amountLimit: (json['amount_limit'] as num).toDouble(),
       period: json['period'],
@@ -22,6 +24,7 @@ class BudgetModel extends BudgetEntity {
   Map<String, dynamic> toJson() {
     return {
       'id': id,
+      'user_id': userId,
       'category_id': categoryId,
       'amount_limit': amountLimit,
       'period': period,

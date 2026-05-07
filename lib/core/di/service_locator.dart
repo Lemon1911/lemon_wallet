@@ -25,6 +25,7 @@ import '../../features/wallet/data/datasource/wallet_local_datasource.dart';
 import '../database/database_helper.dart';
 
 import '../../features/budget/data/datasources/budget_local_datasource.dart';
+import '../../features/budget/data/datasources/budget_remote_datasource.dart';
 import '../../features/budget/data/repoimpl/budget_repository_impl.dart';
 import '../../features/budget/domain/repositories/budget_repository.dart';
 import '../../features/budget/domain/usecases/budget_usecases.dart';
@@ -107,10 +108,17 @@ Future<void> init() async {
   sl.registerLazySingleton(() => AddBudgetUseCase(sl()));
   sl.registerLazySingleton(() => DeleteBudgetUseCase(sl()));
   sl.registerLazySingleton<BudgetRepository>(
-    () => BudgetRepositoryImpl(localDataSource: sl()),
+    () => BudgetRepositoryImpl(
+      localDataSource: sl(),
+      remoteDataSource: sl(),
+      supabaseClient: sl(),
+    ),
   );
   sl.registerLazySingleton<BudgetLocalDataSource>(
     () => BudgetLocalDataSourceImpl(sl()),
+  );
+  sl.registerLazySingleton<BudgetRemoteDataSource>(
+    () => BudgetRemoteDataSourceImpl(sl()),
   );
 
   // External

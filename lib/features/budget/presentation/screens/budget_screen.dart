@@ -12,6 +12,8 @@ import '../bloc/budget_bloc.dart';
 import '../bloc/budget_event.dart';
 import '../bloc/budget_state.dart';
 import '../../domain/entities/budget_entity.dart';
+import '../../../auth/presentation/bloc/auth_bloc.dart';
+import '../../../auth/presentation/bloc/auth_state.dart';
 
 class BudgetScreen extends StatefulWidget {
   const BudgetScreen({super.key});
@@ -226,9 +228,11 @@ class _BudgetScreenState extends State<BudgetScreen> {
                   width: double.infinity,
                   child: ElevatedButton(
                     onPressed: () {
-                      if (selectedCategory != null && amountController.text.isNotEmpty) {
+                      final authState = context.read<AuthBloc>().state;
+                      if (authState is AuthAuthenticated && selectedCategory != null && amountController.text.isNotEmpty) {
                         final budget = BudgetEntity(
                           id: const Uuid().v4(),
+                          userId: authState.user.id,
                           categoryId: selectedCategory!.id,
                           amountLimit: double.parse(amountController.text),
                           period: 'monthly',
