@@ -1,6 +1,7 @@
 import 'package:dartz/dartz.dart';
 import '../../domain/entities/user_entity.dart';
 import '../../domain/repo/auth_repository.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../datasource/auth_remote_datasource.dart';
 
 class AuthRepositoryImpl implements AuthRepository {
@@ -14,8 +15,13 @@ class AuthRepositoryImpl implements AuthRepository {
     required String password,
   }) async {
     try {
-      final user = await remoteDataSource.login(email: email, password: password);
+      final user = await remoteDataSource.login(
+        email: email,
+        password: password,
+      );
       return Right(user);
+    } on AuthException catch (e) {
+      return Left(e.message);
     } catch (e) {
       return Left(e.toString());
     }
@@ -34,6 +40,8 @@ class AuthRepositoryImpl implements AuthRepository {
         fullName: fullName,
       );
       return Right(user);
+    } on AuthException catch (e) {
+      return Left(e.message);
     } catch (e) {
       return Left(e.toString());
     }

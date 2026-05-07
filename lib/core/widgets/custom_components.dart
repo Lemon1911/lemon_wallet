@@ -97,7 +97,9 @@ class GlassCard extends StatelessWidget {
   final EdgeInsetsGeometry? padding;
   final BorderRadius? borderRadius;
   final Color? borderColor;
+  final BoxBorder? border;
   final Color? fillColor;
+  final bool hasBlur;
 
   const GlassCard({
     super.key,
@@ -107,36 +109,42 @@ class GlassCard extends StatelessWidget {
     this.padding,
     this.borderRadius,
     this.borderColor,
+    this.border,
     this.fillColor,
+    this.hasBlur = true,
   });
 
   @override
   Widget build(BuildContext context) {
     final finalBorderRadius = borderRadius ?? BorderRadius.circular(24);
-    
+
+    final innerContainer = Container(
+      padding: padding ?? const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: fillColor ?? AppColors.glassFill,
+        borderRadius: finalBorderRadius,
+      ),
+      child: child,
+    );
+
     return Container(
       width: width,
       height: height,
       decoration: BoxDecoration(
         borderRadius: finalBorderRadius,
-        border: Border.all(
+        border: border ?? Border.all(
           color: borderColor ?? AppColors.glassBorder,
           width: 1.5,
         ),
       ),
       child: ClipRRect(
         borderRadius: finalBorderRadius,
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
-          child: Container(
-            padding: padding ?? const EdgeInsets.all(24),
-            decoration: BoxDecoration(
-              color: fillColor ?? AppColors.glassFill,
-              borderRadius: finalBorderRadius,
-            ),
-            child: child,
-          ),
-        ),
+        child: hasBlur 
+            ? BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                child: innerContainer,
+              )
+            : innerContainer,
       ),
     );
   }
@@ -210,13 +218,79 @@ class _NavBarItem extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: isActive ? AppColors.accent.withValues(alpha: 0.1) : Colors.transparent,
+          color: isActive
+              ? AppColors.accent.withValues(alpha: 0.1)
+              : Colors.transparent,
           shape: BoxShape.circle,
         ),
         child: Icon(
           icon,
           color: isActive ? AppColors.primary : AppColors.textSecondaryDark,
           size: 28,
+        ),
+      ),
+    );
+  }
+}
+
+class GlassSideNavBar extends StatelessWidget {
+  final int currentIndex;
+  final Function(int) onTap;
+
+  const GlassSideNavBar({
+    super.key,
+    required this.currentIndex,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(24),
+      child: GlassCard(
+        padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 8),
+        borderRadius: BorderRadius.circular(32),
+        child: Column(
+          children: [
+            Image.asset('assets/images/logo_cyan.png', height: 40),
+            const SizedBox(height: 64),
+            Expanded(
+              child: Column(
+                children: [
+                  _NavBarItem(
+                    icon: Icons.dashboard_rounded,
+                    isActive: currentIndex == 0,
+                    onTap: () => onTap(0),
+                  ),
+                  const SizedBox(height: 24),
+                  _NavBarItem(
+                    icon: Icons.account_balance_wallet_rounded,
+                    isActive: currentIndex == 1,
+                    onTap: () => onTap(1),
+                  ),
+                  const SizedBox(height: 24),
+                  _NavBarItem(
+                    icon: Icons.swap_horiz_rounded,
+                    isActive: currentIndex == 2,
+                    onTap: () => onTap(2),
+                  ),
+                  const SizedBox(height: 24),
+                  _NavBarItem(
+                    icon: Icons.person_rounded,
+                    isActive: currentIndex == 3,
+                    onTap: () => onTap(3),
+                  ),
+                ],
+              ),
+            ),
+            _NavBarItem(
+              icon: Icons.logout_rounded,
+              isActive: false,
+              onTap: () {
+                // Handle logout if needed
+              },
+            ),
+          ],
         ),
       ),
     );

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:lemon_wallet/core/router/app_router.dart';
 import 'package:lemon_wallet/core/widgets/custom_components.dart';
 import 'package:lemon_wallet/core/theme/app_colors.dart';
 import 'package:lemon_wallet/features/auth/presentation/bloc/auth_bloc.dart';
@@ -32,6 +33,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
       extendBodyBehindAppBar: true,
       body: BlocListener<AuthBloc, AuthState>(
         listener: (context, state) {
+          if (state is AuthAuthenticated) {
+            context.go(AppRouter.home);
+          }
           if (state is AuthError) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
@@ -44,7 +48,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
         child: Container(
           color: AppColors.bgDark, // Deep Midnight Blue background
           child: SafeArea(
-              child: Center(
+            child: Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 450),
                 child: SingleChildScrollView(
                   padding: const EdgeInsets.all(24.0),
                   child: Form(
@@ -175,6 +181,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       ],
                     ),
                   ),
+                ),
               ),
             ),
           ),

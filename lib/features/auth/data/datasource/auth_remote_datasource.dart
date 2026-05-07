@@ -2,10 +2,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/user_model.dart';
 
 abstract class AuthRemoteDataSource {
-  Future<UserModel> login({
-    required String email,
-    required String password,
-  });
+  Future<UserModel> login({required String email, required String password});
 
   Future<UserModel> register({
     required String email,
@@ -28,14 +25,26 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     required String email,
     required String password,
   }) async {
+    String finalEmail = email.trim();
+    if (!finalEmail.contains('@')) {
+      // For convenience, if no @ is provided, assume it's the test domain
+      finalEmail = '$finalEmail@lemon.com';
+    }
+
     final response = await supabaseClient.auth.signInWithPassword(
-      email: email,
+      email: finalEmail,
       password: password,
     );
 
     if (response.user == null) {
       throw Exception('Login failed: User is null');
     }
+
+    // Sync to public.users table to ensure profile exists
+    await supabaseClient.from('users').upsert({
+      'id': response.user!.id,
+      'full_name': response.user!.userMetadata?['full_name'] as String?,
+    });
 
     return UserModel(
       id: response.user!.id,
@@ -60,8 +69,8 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       throw Exception('Registration failed: User is null');
     }
 
-    // Also insert into our public 'users' table
-    await supabaseClient.from('users').insert({
+    // Also insert into our public 'users' table using upsert to avoid duplicate key errors
+    await supabaseClient.from('users').upsert({
       'id': response.user!.id,
       'full_name': fullName,
     });

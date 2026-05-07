@@ -14,10 +14,10 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     required LoginUseCase loginUseCase,
     required RegisterUseCase registerUseCase,
     required AuthRepository repository,
-  })  : _loginUseCase = loginUseCase,
-        _registerUseCase = registerUseCase,
-        _repository = repository,
-        super(AuthInitial()) {
+  }) : _loginUseCase = loginUseCase,
+       _registerUseCase = registerUseCase,
+       _repository = repository,
+       super(AuthInitial()) {
     on<AuthLoginRequested>(_onLoginRequested);
     on<AuthRegisterRequested>(_onRegisterRequested);
     on<AuthLogoutRequested>(_onLogoutRequested);
@@ -68,15 +68,12 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     Emitter<AuthState> emit,
   ) async {
     final result = await _repository.getCurrentUser();
-    result.fold(
-      (failure) => emit(AuthUnauthenticated()),
-      (user) {
-        if (user != null) {
-          emit(AuthAuthenticated(user));
-        } else {
-          emit(AuthUnauthenticated());
-        }
-      },
-    );
+    result.fold((failure) => emit(AuthUnauthenticated()), (user) {
+      if (user != null) {
+        emit(AuthAuthenticated(user));
+      } else {
+        emit(AuthUnauthenticated());
+      }
+    });
   }
 }

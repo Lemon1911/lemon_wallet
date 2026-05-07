@@ -1,61 +1,88 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/custom_components.dart';
+import '../../../wallet/presentation/bloc/wallet_bloc.dart';
+import '../bloc/transaction_bloc.dart';
+import '../bloc/transaction_event.dart';
+import '../bloc/transaction_state.dart';
+import '../../domain/entities/transaction_entity.dart';
 
 class TransactionsScreen extends StatelessWidget {
   const TransactionsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.fromLTRB(24, 60, 24, 120),
+    return BlocBuilder<WalletBloc, WalletState>(
+      builder: (context, walletState) {
+        if (walletState is WalletsLoaded && walletState.wallets.isNotEmpty) {
+          final walletId = walletState.wallets.first.id;
+          context.read<TransactionBloc>().add(LoadTransactions(walletId));
+          
+          return BlocBuilder<TransactionBloc, TransactionState>(
+            builder: (context, state) {
+              if (state is TransactionLoading) {
+                return const Center(child: CircularProgressIndicator());
+              }
+              if (state is TransactionsLoaded) {
+                if (state.transactions.isEmpty) {
+                  return _buildEmptyState();
+                }
+                return _buildTransactionList(state.transactions);
+              }
+              return const Center(child: Text('Load transactions...'));
+            },
+          );
+        }
+        return const Center(child: Text('No wallets found'));
+      },
+    );
+  }
+
+  Widget _buildEmptyState() {
+    return Center(
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          _buildHeader(),
-          const SizedBox(height: 24),
-          _buildSearchBar(),
-          const SizedBox(height: 32),
-          _buildGroupHeader('Today'),
+          const Icon(Icons.receipt_long_rounded, size: 64, color: Colors.white24),
           const SizedBox(height: 16),
-          _buildTransactionItem(
-            icon: Icons.shopping_bag_rounded,
-            title: 'Apple Store',
-            time: '10:45 AM',
-            amount: '- \$999.00',
-          ),
-          _buildTransactionItem(
-            icon: Icons.fastfood_rounded,
-            title: 'McDonald\'s',
-            time: '09:30 AM',
-            amount: '- \$15.20',
-          ),
-          const SizedBox(height: 24),
-          _buildGroupHeader('Yesterday'),
-          const SizedBox(height: 16),
-          _buildTransactionItem(
-            icon: Icons.coffee_rounded,
-            title: 'Starbucks',
-            time: '08:20 PM',
-            amount: '- \$12.50',
-          ),
-          _buildTransactionItem(
-            icon: Icons.trending_up_rounded,
-            title: 'Dividend Pay',
-            time: '02:15 PM',
-            amount: '+ \$250.00',
-            isPositive: true,
-          ),
-          _buildTransactionItem(
-            icon: Icons.electric_bolt_rounded,
-            title: 'Electric Bill',
-            time: '11:00 AM',
-            amount: '- \$85.00',
-          ),
+          Text('No transactions yet', style: TextStyle(color: AppColors.textSecondaryDark)),
         ],
       ),
     );
+  }
+
+  Widget _buildTransactionList(List<TransactionEntity> transactions) {
+    return Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 800),
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.fromLTRB(24, 60, 24, 120),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildHeader(),
+              const SizedBox(height: 24),
+              _buildSearchBar(),
+              const SizedBox(height: 32),
+              ...transactions.map((tx) => _buildTransactionItem(
+                icon: _getCategoryIcon(tx.categoryId), // Map category ID to icon later
+                title: tx.note.isEmpty ? 'Transaction' : tx.note,
+                time: '${tx.transactionDate.day}/${tx.transactionDate.month}',
+                amount: '${tx.type == TransactionType.income ? '+' : '-'} \$${tx.amount.toStringAsFixed(2)}',
+                isPositive: tx.type == TransactionType.income,
+              )),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  IconData _getCategoryIcon(String categoryId) {
+    // This is a simplified mapping. In a real app, you'd fetch the category name/icon.
+    return Icons.category_rounded;
   }
 
   Widget _buildHeader() {
@@ -74,7 +101,11 @@ class TransactionsScreen extends StatelessWidget {
         GlassCard(
           padding: const EdgeInsets.all(10),
           borderRadius: BorderRadius.circular(12),
-          child: const Icon(Icons.filter_list_rounded, color: Colors.white, size: 20),
+          child: const Icon(
+            Icons.filter_list_rounded,
+            color: Colors.white,
+            size: 20,
+          ),
         ),
       ],
     ).animate().fadeIn(duration: 600.ms).slideY(begin: -0.2, end: 0);
@@ -82,18 +113,24 @@ class TransactionsScreen extends StatelessWidget {
 
   Widget _buildSearchBar() {
     return GlassCard(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-      borderRadius: BorderRadius.circular(50),
-      child: const TextField(
-        style: TextStyle(color: Colors.white),
-        decoration: InputDecoration(
-          hintText: 'Search transactions...',
-          hintStyle: TextStyle(color: AppColors.textSecondaryDark),
-          prefixIcon: Icon(Icons.search_rounded, color: AppColors.textSecondaryDark),
-          border: InputBorder.none,
-        ),
-      ),
-    ).animate().fadeIn(delay: 200.ms, duration: 600.ms).scale(begin: const Offset(0.95, 0.95));
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+          borderRadius: BorderRadius.circular(50),
+          child: const TextField(
+            style: TextStyle(color: Colors.white),
+            decoration: InputDecoration(
+              hintText: 'Search transactions...',
+              hintStyle: TextStyle(color: AppColors.textSecondaryDark),
+              prefixIcon: Icon(
+                Icons.search_rounded,
+                color: AppColors.textSecondaryDark,
+              ),
+              border: InputBorder.none,
+            ),
+          ),
+        )
+        .animate()
+        .fadeIn(delay: 200.ms, duration: 600.ms)
+        .scale(begin: const Offset(0.95, 0.95));
   }
 
   Widget _buildGroupHeader(String label) {
@@ -116,46 +153,56 @@ class TransactionsScreen extends StatelessWidget {
     bool isPositive = false,
   }) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: GlassCard(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-        child: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: AppColors.accent.withValues(alpha: 0.1),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(icon, color: AppColors.accent, size: 20),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          padding: const EdgeInsets.only(bottom: 12),
+          child: GlassCard(
+            hasBlur: false, // Performance optimization for lists
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: AppColors.accent.withValues(alpha: 0.1),
+                    shape: BoxShape.circle,
                   ),
-                  Text(
-                    time,
-                    style: TextStyle(color: AppColors.textSecondaryDark, fontSize: 12),
+                  child: Icon(icon, color: AppColors.accent, size: 20),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Text(
+                        time,
+                        style: TextStyle(
+                          color: AppColors.textSecondaryDark,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ],
                   ),
-                ],
-              ),
+                ),
+                Text(
+                  amount,
+                  style: TextStyle(
+                    color: isPositive ? AppColors.primary : Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
+                ),
+              ],
             ),
-            Text(
-              amount,
-              style: TextStyle(
-                color: isPositive ? AppColors.primary : Colors.white,
-                fontWeight: FontWeight.bold,
-                fontSize: 16,
-              ),
-            ),
-          ],
-        ),
-      ),
-    ).animate().fadeIn(delay: 400.ms, duration: 600.ms).slideY(begin: 0.1, end: 0);
+          ),
+        )
+        .animate()
+        .fadeIn(delay: 400.ms, duration: 600.ms)
+        .slideY(begin: 0.1, end: 0);
   }
 }
