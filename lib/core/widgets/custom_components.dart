@@ -27,13 +27,21 @@ class CustomTextField extends StatelessWidget {
         labelText: labelText,
         prefixIcon: Icon(prefixIcon, color: AppColors.primary),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
-          borderSide: BorderSide.none,
+          borderRadius: BorderRadius.circular(50),
+          borderSide: const BorderSide(color: AppColors.glassBorder),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(50),
+          borderSide: const BorderSide(color: AppColors.glassBorder),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(50),
+          borderSide: const BorderSide(color: AppColors.primary),
         ),
         filled: true,
         fillColor: Theme.of(context).brightness == Brightness.dark
-            ? AppColors.surfaceDark
-            : Colors.grey[200],
+            ? AppColors.glassFill
+            : Colors.grey[100],
       ),
     );
   }
@@ -59,15 +67,16 @@ class CustomButton extends StatelessWidget {
       child: ElevatedButton(
         onPressed: isLoading ? null : onPressed,
         style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.primary,
-          foregroundColor: AppColors.bgDark,
+          backgroundColor: AppColors.accent, // Electric Indigo
+          foregroundColor: Colors.white,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(50),
           ),
-          elevation: 0,
+          elevation: 4,
+          shadowColor: AppColors.accent.withValues(alpha: 0.5),
         ),
         child: isLoading
-            ? const CircularProgressIndicator(color: AppColors.bgDark)
+            ? const CircularProgressIndicator(color: Colors.white)
             : Text(
                 text,
                 style: const TextStyle(

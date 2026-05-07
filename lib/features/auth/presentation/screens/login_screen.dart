@@ -6,8 +6,10 @@ import 'package:lemons_pay/core/widgets/custom_components.dart';
 import 'package:lemons_pay/core/theme/app_colors.dart';
 import 'package:lemons_pay/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:lemons_pay/features/auth/presentation/bloc/auth_event.dart';
+import 'dart:ui';
 import 'package:lemons_pay/features/auth/presentation/bloc/auth_state.dart';
 import 'package:lemons_pay/l10n/app_localizations.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -34,17 +36,8 @@ class _LoginScreenState extends State<LoginScreen> {
             );
           }
         },
-        child: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [
-                AppColors.primary.withValues(alpha: 0.1),
-                Theme.of(context).scaffoldBackgroundColor,
-              ],
-            ),
-          ),
+          child: Container(
+          color: AppColors.bgDark, // Deep Midnight Blue background
           child: SafeArea(
             child: Center(
               child: SingleChildScrollView(
@@ -54,62 +47,94 @@ class _LoginScreenState extends State<LoginScreen> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Icon(
-                        Icons.account_balance_wallet,
-                        size: 100,
-                        color: AppColors.primary,
-                      ),
+                      // Animated Logo
+                      Image.asset(
+                        'assets/images/logo_cyan.png',
+                        height: 120,
+                      )
+                          .animate(onPlay: (controller) => controller.repeat(reverse: true))
+                          .shimmer(duration: 2.seconds, color: AppColors.primary.withValues(alpha: 0.3))
+                          .animate() // Entrance
+                          .fadeIn(duration: 600.ms, curve: Curves.easeOut)
+                          .scale(begin: const Offset(0.8, 0.8)),
+                      
                       const SizedBox(height: 32),
-                      Text(
-                        l10n.login,
-                        style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                              fontWeight: FontWeight.bold,
+                      
+                      // Glassmorphic Card
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(32),
+                        child: BackdropFilter(
+                          filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
+                          child: Container(
+                            padding: const EdgeInsets.all(32),
+                            decoration: BoxDecoration(
+                              color: AppColors.glassFill,
+                              borderRadius: BorderRadius.circular(32),
+                              border: Border.all(color: AppColors.glassBorder),
                             ),
-                      ),
-                      const SizedBox(height: 48),
-                      CustomTextField(
-                        controller: _emailController,
-                        labelText: l10n.email,
-                        prefixIcon: Icons.email_outlined,
-                        validator: (value) =>
-                            value!.isEmpty ? 'Please enter email' : null,
-                      ),
-                      const SizedBox(height: 16),
-                      CustomTextField(
-                        controller: _passwordController,
-                        labelText: l10n.password,
-                        prefixIcon: Icons.lock_outline,
-                        isPassword: true,
-                        validator: (value) =>
-                            value!.isEmpty ? 'Please enter password' : null,
-                      ),
-                      const SizedBox(height: 32),
-                      BlocBuilder<AuthBloc, AuthState>(
-                        builder: (context, state) {
-                          return CustomButton(
-                            text: l10n.login,
-                            isLoading: state is AuthLoading,
-                            onPressed: () {
-                              if (_formKey.currentState!.validate()) {
-                                context.read<AuthBloc>().add(
-                                      AuthLoginRequested(
-                                        email: _emailController.text.trim(),
-                                        password: _passwordController.text.trim(),
+                            child: Column(
+                              children: [
+                                Text(
+                                  l10n.login,
+                                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.white,
                                       ),
+                                ),
+                                const SizedBox(height: 32),
+                                CustomTextField(
+                                  controller: _emailController,
+                                  labelText: l10n.email,
+                                  prefixIcon: Icons.email_outlined,
+                                  validator: (value) =>
+                                      value!.isEmpty ? 'Please enter email' : null,
+                                ),
+                                const SizedBox(height: 16),
+                                CustomTextField(
+                                  controller: _passwordController,
+                                  labelText: l10n.password,
+                                  prefixIcon: Icons.lock_outline,
+                                  isPassword: true,
+                                  validator: (value) =>
+                                      value!.isEmpty ? 'Please enter password' : null,
+                                ),
+                                const SizedBox(height: 32),
+                                BlocBuilder<AuthBloc, AuthState>(
+                                  builder: (context, state) {
+                                    return CustomButton(
+                                      text: l10n.login,
+                                      isLoading: state is AuthLoading,
+                                      onPressed: () {
+                                        if (_formKey.currentState!.validate()) {
+                                          context.read<AuthBloc>().add(
+                                                AuthLoginRequested(
+                                                  email: _emailController.text.trim(),
+                                                  password: _passwordController.text.trim(),
+                                                ),
+                                              );
+                                        }
+                                      },
                                     );
-                              }
-                            },
-                          );
-                        },
-                      ),
-                      const SizedBox(height: 16),
+                                  },
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ).animate().fadeIn(duration: 800.ms, delay: 200.ms).slideY(begin: 0.1, curve: Curves.easeOut),
+                      
+                      const SizedBox(height: 24),
                       TextButton(
                         onPressed: () => context.push(AppRouter.register),
                         child: Text(
                           l10n.dontHaveAccount,
-                          style: const TextStyle(color: AppColors.primary),
+                          style: const TextStyle(
+                            color: AppColors.primary,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 1.1,
+                          ),
                         ),
-                      ),
+                      ).animate().fadeIn(duration: 800.ms, delay: 400.ms),
                     ],
                   ),
                 ),

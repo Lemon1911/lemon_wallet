@@ -1,6 +1,4 @@
 import 'package:local_auth/local_auth.dart';
-import 'package:local_auth_android/local_auth_android.dart';
-import 'package:local_auth_darwin/local_auth_darwin.dart';
 
 class BiometricService {
   final LocalAuthentication _auth = LocalAuthentication();
@@ -17,19 +15,6 @@ class BiometricService {
 
       return await _auth.authenticate(
         localizedReason: 'Please authenticate to access your wallet',
-        options: const AuthenticationOptions(
-          stickyAuth: true,
-          biometricOnly: true,
-        ),
-        authMessages: const <AuthMessages>[
-          AndroidAuthMessages(
-            signInTitle: 'Biometric Authentication',
-            fingerprintHint: 'Touch the sensor',
-          ),
-          IOSAuthMessages(
-            cancelButton: 'No thanks',
-          ),
-        ],
       );
     } catch (e) {
       return false;
