@@ -103,7 +103,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
                 _buildEmptyState()
               else
                 ...transactions.map((tx) {
-                  final category = categories.firstWhere(
+                  final category = categories.cast<CategoryEntity>().firstWhere(
                     (c) => c.id == tx.categoryId,
                     orElse: () => const CategoryEntity(id: '', name: 'Transaction', type: '', icon: 'default'),
                   );

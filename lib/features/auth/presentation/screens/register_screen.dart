@@ -19,7 +19,7 @@ class RegisterScreen extends StatefulWidget {
 }
 
 class _RegisterScreenState extends State<RegisterScreen> {
-  final _emailController = TextEditingController();
+  final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
   final _nameController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
@@ -114,11 +114,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                       ),
                                       const SizedBox(height: 16),
                                       CustomTextField(
-                                        controller: _emailController,
-                                        labelText: l10n.email,
-                                        prefixIcon: Icons.email_outlined,
+                                        controller: _usernameController,
+                                        labelText: 'Username',
+                                        prefixIcon: Icons.account_circle_outlined,
                                         validator: (value) => value!.isEmpty
-                                            ? 'Please enter email'
+                                            ? 'Please enter username'
                                             : null,
                                       ),
                                       const SizedBox(height: 16),
@@ -142,7 +142,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                                   .validate()) {
                                                 context.read<AuthBloc>().add(
                                                   AuthRegisterRequested(
-                                                    email: _emailController.text
+                                                    username: _usernameController.text
                                                         .trim(),
                                                     password:
                                                         _passwordController.text

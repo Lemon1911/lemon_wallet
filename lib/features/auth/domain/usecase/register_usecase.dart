@@ -8,12 +8,12 @@ class RegisterUseCase {
   RegisterUseCase(this.repository);
 
   Future<Either<String, UserEntity>> call({
-    required String email,
+    required String username,
     required String password,
     required String fullName,
   }) {
     return repository.register(
-      email: email,
+      username: username,
       password: password,
       fullName: fullName,
     );

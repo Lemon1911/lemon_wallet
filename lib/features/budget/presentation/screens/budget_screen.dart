@@ -70,7 +70,7 @@ class _BudgetScreenState extends State<BudgetScreen> {
                 _buildEmptyState()
               else
                 ...budgets.map((budget) {
-                  final category = categories.firstWhere(
+                  final category = categories.cast<CategoryEntity>().firstWhere(
                     (c) => c.id == budget.categoryId,
                     orElse: () => const CategoryEntity(id: '', name: 'Unknown', type: '', icon: 'default'),
                   );

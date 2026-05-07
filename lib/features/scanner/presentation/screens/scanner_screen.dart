@@ -9,7 +9,6 @@ import '../bloc/scanner_event.dart';
 import '../bloc/scanner_state.dart';
 import '../../../transactions/domain/entities/transaction_entity.dart';
 import '../../../../core/router/app_router.dart';
-import '../../../../core/di/service_locator.dart';
 
 class ScannerScreen extends StatefulWidget {
   final String walletId;
@@ -25,17 +24,14 @@ class _ScannerScreenState extends State<ScannerScreen> {
   Future<void> _pickImage(ImageSource source) async {
     final pickedFile = await _picker.pickImage(source: source);
     if (pickedFile != null) {
-      if (mounted) {
-        context.read<ScannerBloc>().add(ProcessImageEvent(pickedFile.path));
-      }
+      if (!mounted) return;
+      context.read<ScannerBloc>().add(ProcessImageEvent(pickedFile.path));
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (_) => sl<ScannerBloc>(),
-      child: Scaffold(
+    return Scaffold(
         backgroundColor: AppColors.bgDark,
         appBar: AppBar(
           backgroundColor: Colors.transparent,
@@ -76,11 +72,12 @@ class _ScannerScreenState extends State<ScannerScreen> {
               );
             }
 
-            return Padding(
+            return SingleChildScrollView(
               padding: const EdgeInsets.all(24.0),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
+                  const SizedBox(height: 20),
                   GlassCard(
                     height: 180,
                     width: double.infinity,
@@ -118,12 +115,12 @@ class _ScannerScreenState extends State<ScannerScreen> {
                       ),
                     ],
                   ),
+                  const SizedBox(height: 20),
                 ],
               ),
             );
           },
         ),
-      ),
-    );
-  }
+      );
+    }
 }

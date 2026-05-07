@@ -16,18 +16,22 @@ class TransactionModel extends TransactionEntity {
 
   factory TransactionModel.fromJson(Map<String, dynamic> json) {
     return TransactionModel(
-      id: json['id'] as String,
-      walletId: json['wallet_id'] as String,
-      categoryId: json['category_id'] as String,
-      userId: json['user_id'] as String,
-      amount: (json['amount'] as num).toDouble(),
+      id: (json['id'] ?? '').toString(),
+      walletId: (json['wallet_id'] ?? '').toString(),
+      categoryId: (json['category_id'] ?? '').toString(),
+      userId: (json['user_id'] ?? '').toString(),
+      amount: double.tryParse(json['amount']?.toString() ?? '0') ?? 0.0,
       type: json['type'] == 'income'
           ? TransactionType.income
           : TransactionType.expense,
-      note: json['note'] ?? '',
-      receiptUrl: json['receipt_url'] as String?,
-      transactionDate: DateTime.parse(json['transaction_date'] as String),
-      createdAt: DateTime.parse(json['created_at'] as String),
+      note: json['note']?.toString() ?? '',
+      receiptUrl: json['receipt_url']?.toString(),
+      transactionDate: json['transaction_date'] != null 
+          ? DateTime.parse(json['transaction_date'].toString())
+          : DateTime.now(),
+      createdAt: json['created_at'] != null 
+          ? DateTime.parse(json['created_at'].toString())
+          : DateTime.now(),
     );
   }
 

@@ -11,12 +11,12 @@ class AuthRepositoryImpl implements AuthRepository {
 
   @override
   Future<Either<String, UserEntity>> login({
-    required String email,
+    required String username,
     required String password,
   }) async {
     try {
       final user = await remoteDataSource.login(
-        email: email,
+        username: username,
         password: password,
       );
       return Right(user);
@@ -29,13 +29,13 @@ class AuthRepositoryImpl implements AuthRepository {
 
   @override
   Future<Either<String, UserEntity>> register({
-    required String email,
+    required String username,
     required String password,
     required String fullName,
   }) async {
     try {
       final user = await remoteDataSource.register(
-        email: email,
+        username: username,
         password: password,
         fullName: fullName,
       );

@@ -19,7 +19,7 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  final _emailController = TextEditingController();
+  final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
 
@@ -111,15 +111,17 @@ class _LoginScreenState extends State<LoginScreen> {
                                       ),
                                       const SizedBox(height: 32),
                                       CustomTextField(
-                                        controller: _emailController,
-                                        labelText: l10n.email,
-                                        prefixIcon: Icons.email_outlined,
+                                        key: const Key('username_field'),
+                                        controller: _usernameController,
+                                        labelText: 'Username',
+                                        prefixIcon: Icons.person_outline,
                                         validator: (value) => value!.isEmpty
-                                            ? 'Please enter email'
+                                            ? 'Please enter username'
                                             : null,
                                       ),
                                       const SizedBox(height: 16),
                                       CustomTextField(
+                                        key: const Key('password_field'),
                                         controller: _passwordController,
                                         labelText: l10n.password,
                                         prefixIcon: Icons.lock_outline,
@@ -131,23 +133,44 @@ class _LoginScreenState extends State<LoginScreen> {
                                       const SizedBox(height: 32),
                                       BlocBuilder<AuthBloc, AuthState>(
                                         builder: (context, state) {
-                                          return CustomButton(
-                                            text: l10n.login,
-                                            isLoading: state is AuthLoading,
-                                            onPressed: () {
-                                              if (_formKey.currentState!
-                                                  .validate()) {
-                                                context.read<AuthBloc>().add(
-                                                  AuthLoginRequested(
-                                                    email: _emailController.text
-                                                        .trim(),
-                                                    password:
-                                                        _passwordController.text
-                                                            .trim(),
-                                                  ),
-                                                );
-                                              }
-                                            },
+                                          return Column(
+                                            children: [
+                                              CustomButton(
+                                                key: const Key('login_button'),
+                                                text: l10n.login,
+                                                isLoading: state is AuthLoading,
+                                                onPressed: () {
+                                                  if (_formKey.currentState!
+                                                      .validate()) {
+                                                    context
+                                                        .read<AuthBloc>()
+                                                        .add(
+                                                          AuthLoginRequested(
+                                                            username:
+                                                                _usernameController
+                                                                    .text
+                                                                    .trim(),
+                                                            password:
+                                                                _passwordController
+                                                                    .text
+                                                                    .trim(),
+                                                          ),
+                                                        );
+                                                  }
+                                                },
+                                              ),
+                                              const SizedBox(height: 16),
+                                              IconButton(
+                                                onPressed: () {
+                                                  context.read<AuthBloc>().add(
+                                                      AuthBiometricLoginRequested());
+                                                },
+                                                icon: const Icon(
+                                                    Icons.fingerprint,
+                                                    size: 48,
+                                                    color: AppColors.primary),
+                                              ),
+                                            ],
                                           );
                                         },
                                       ),

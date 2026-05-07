@@ -21,6 +21,7 @@ class CustomTextField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return TextFormField(
+      key: key,
       controller: controller,
       obscureText: isPassword,
       validator: validator,

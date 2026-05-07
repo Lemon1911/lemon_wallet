@@ -22,8 +22,9 @@ class DatabaseHelper {
 
     return await openDatabase(
       path,
-      version: 1,
+      version: 2,
       onCreate: _onCreate,
+      onUpgrade: _onUpgrade,
     );
   }
 
@@ -56,11 +57,13 @@ class DatabaseHelper {
         id TEXT PRIMARY KEY,
         wallet_id TEXT,
         category_id TEXT,
+        user_id TEXT,
         amount REAL,
         type TEXT,
         note TEXT,
         transaction_date TEXT,
         receipt_url TEXT,
+        created_at TEXT,
         FOREIGN KEY (wallet_id) REFERENCES wallets (id) ON DELETE CASCADE,
         FOREIGN KEY (category_id) REFERENCES categories (id)
       )
@@ -78,6 +81,13 @@ class DatabaseHelper {
         FOREIGN KEY (category_id) REFERENCES categories (id)
       )
     ''');
+  }
+
+  Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
+    if (oldVersion < 2) {
+      await db.execute('ALTER TABLE transactions ADD COLUMN user_id TEXT');
+      await db.execute('ALTER TABLE transactions ADD COLUMN created_at TEXT');
+    }
   }
 
   Future<void> clearDatabase() async {

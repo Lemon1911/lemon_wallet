@@ -11,11 +11,13 @@ class WalletModel extends WalletEntity {
 
   factory WalletModel.fromJson(Map<String, dynamic> json) {
     return WalletModel(
-      id: json['id'] as String,
-      name: json['name'] as String,
-      currency: json['currency'] as String,
-      ownerId: json['owner_id'] ?? json['user_id'] as String,
-      createdAt: DateTime.parse(json['created_at'] as String),
+      id: (json['id'] ?? '').toString(),
+      name: (json['name'] ?? 'Unnamed Wallet').toString(),
+      currency: (json['currency'] ?? 'USD').toString(),
+      ownerId: (json['owner_id'] ?? json['user_id'] ?? '').toString(),
+      createdAt: json['created_at'] != null 
+          ? DateTime.parse(json['created_at'].toString())
+          : DateTime.now(),
     );
   }
 

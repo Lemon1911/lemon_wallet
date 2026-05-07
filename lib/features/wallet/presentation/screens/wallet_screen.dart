@@ -180,7 +180,7 @@ class _WalletScreenState extends State<WalletScreen> {
                           ),
                           const SizedBox(height: 8),
                           Text(
-                            '**** **** **** ${wallet.id.substring(wallet.id.length - 4).toUpperCase()}',
+                            '**** **** **** ${wallet.id.length >= 4 ? wallet.id.substring(wallet.id.length - 4).toUpperCase() : 'NEW'}',
                             style: const TextStyle(
                               color: Colors.white,
                               fontSize: 22,
@@ -294,11 +294,15 @@ class _WalletScreenState extends State<WalletScreen> {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(label, style: TextStyle(color: AppColors.textSecondaryDark)),
-        Text(
-          value,
-          style: const TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.w600,
+        Flexible(
+          child: Text(
+            value,
+            textAlign: TextAlign.right,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.w600,
+            ),
           ),
         ),
       ],

@@ -2,10 +2,10 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/user_model.dart';
 
 abstract class AuthRemoteDataSource {
-  Future<UserModel> login({required String email, required String password});
+  Future<UserModel> login({required String username, required String password});
 
   Future<UserModel> register({
-    required String email,
+    required String username,
     required String password,
     required String fullName,
   });
@@ -23,14 +23,10 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
 
   @override
   Future<UserModel> login({
-    required String email,
+    required String username,
     required String password,
   }) async {
-    String finalEmail = email.trim();
-    if (!finalEmail.contains('@')) {
-      // For convenience, if no @ is provided, assume it's the test domain
-      finalEmail = '$finalEmail@lemon.com';
-    }
+    final String finalEmail = '${username.trim().toLowerCase()}@lemon.com';
 
     final response = await supabaseClient.auth.signInWithPassword(
       email: finalEmail,
@@ -44,24 +40,27 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     // Sync to public.users table to ensure profile exists
     await supabaseClient.from('users').upsert({
       'id': response.user!.id,
+      'username': username.trim().toLowerCase(),
       'full_name': response.user!.userMetadata?['full_name'] as String?,
     });
 
     return UserModel(
       id: response.user!.id,
-      email: response.user!.email!,
+      username: username.trim().toLowerCase(),
       fullName: response.user!.userMetadata?['full_name'] as String?,
     );
   }
 
   @override
   Future<UserModel> register({
-    required String email,
+    required String username,
     required String password,
     required String fullName,
   }) async {
+    final String finalEmail = '${username.trim().toLowerCase()}@lemon.com';
+    
     final response = await supabaseClient.auth.signUp(
-      email: email,
+      email: finalEmail,
       password: password,
       data: {'full_name': fullName},
     );
@@ -73,12 +72,13 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     // Also insert into our public 'users' table using upsert to avoid duplicate key errors
     await supabaseClient.from('users').upsert({
       'id': response.user!.id,
+      'username': username.trim().toLowerCase(),
       'full_name': fullName,
     });
 
     return UserModel(
       id: response.user!.id,
-      email: response.user!.email!,
+      username: username.trim().toLowerCase(),
       fullName: fullName,
     );
   }
@@ -93,9 +93,16 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     final user = supabaseClient.auth.currentUser;
     if (user == null) return null;
 
+    // Fetch username from public table
+    final userData = await supabaseClient
+        .from('users')
+        .select('username')
+        .eq('id', user.id)
+        .single();
+
     return UserModel(
       id: user.id,
-      email: user.email!,
+      username: userData['username'] as String? ?? user.email!.split('@')[0],
       fullName: user.userMetadata?['full_name'] as String?,
     );
   }
@@ -121,9 +128,16 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
 
     await supabaseClient.from('users').upsert(publicData);
 
+    // Get current username for the model return
+    final userData = await supabaseClient
+        .from('users')
+        .select('username')
+        .eq('id', response.user!.id)
+        .single();
+
     return UserModel(
       id: response.user!.id,
-      email: response.user!.email!,
+      username: userData['username'] as String? ?? response.user!.email!.split('@')[0],
       fullName: response.user!.userMetadata?['full_name'] as String?,
       avatarUrl: response.user!.userMetadata?['avatar_url'] as String?,
     );

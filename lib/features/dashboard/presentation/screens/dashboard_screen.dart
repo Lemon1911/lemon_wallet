@@ -384,44 +384,50 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   Widget _buildQuickActions(BuildContext context, List<WalletEntity> wallets) {
     final currentWalletId = wallets.isNotEmpty ? wallets[_selectedWalletIndex].id : null;
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        _ActionPill(icon: Icons.send_rounded, label: 'Send'),
-        _ActionPill(
-          icon: Icons.add_rounded, 
-          label: 'Income',
-          onTap: () {
-            if (currentWalletId != null) {
-              context.push(AppRouter.addTransaction, extra: {
-                'walletId': currentWalletId,
-                'type': TransactionType.income,
-              });
-            }
-          },
-        ),
-        _ActionPill(
-          icon: Icons.payment_rounded, 
-          label: 'Pay',
-          onTap: () {
-            if (currentWalletId != null) {
-              context.push(AppRouter.addTransaction, extra: {
-                'walletId': currentWalletId,
-                'type': TransactionType.expense,
-              });
-            }
-          },
-        ),
-        _ActionPill(
-          icon: Icons.qr_code_scanner_rounded, 
-          label: 'Scan',
-          onTap: () {
-            if (currentWalletId != null) {
-              context.push(AppRouter.scanner, extra: currentWalletId);
-            }
-          },
-        ),
-      ],
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          _ActionPill(icon: Icons.send_rounded, label: 'Send'),
+          const SizedBox(width: 16),
+          _ActionPill(
+            icon: Icons.add_rounded, 
+            label: 'Income',
+            onTap: () {
+              if (currentWalletId != null) {
+                context.push(AppRouter.addTransaction, extra: {
+                  'walletId': currentWalletId,
+                  'type': TransactionType.income,
+                });
+              }
+            },
+          ),
+          const SizedBox(width: 16),
+          _ActionPill(
+            icon: Icons.payment_rounded, 
+            label: 'Pay',
+            onTap: () {
+              if (currentWalletId != null) {
+                context.push(AppRouter.addTransaction, extra: {
+                  'walletId': currentWalletId,
+                  'type': TransactionType.expense,
+                });
+              }
+            },
+          ),
+          const SizedBox(width: 16),
+          _ActionPill(
+            icon: Icons.qr_code_scanner_rounded, 
+            label: 'Scan',
+            onTap: () {
+              if (currentWalletId != null) {
+                context.push(AppRouter.scanner, extra: currentWalletId);
+              }
+            },
+          ),
+        ],
+      ),
     )
         .animate()
         .fadeIn(delay: 400.ms, duration: 600.ms)
@@ -504,7 +510,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       builder: (context, state) {
         if (state is BudgetsLoaded && state.budgets.isNotEmpty) {
           final budget = state.budgets.first; // Show the most important or first one
-          final category = categories.firstWhere(
+          final category = categories.cast<CategoryEntity>().firstWhere(
             (c) => c.id == budget.categoryId,
             orElse: () => const CategoryEntity(id: '', name: 'Unknown', type: '', icon: 'default'),
           );
@@ -597,7 +603,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         ),
         const SizedBox(height: 16),
         ...recentTxs.map((tx) {
-          final category = categories.firstWhere(
+          final category = categories.cast<CategoryEntity>().firstWhere(
             (c) => c.id == tx.categoryId,
             orElse: () => const CategoryEntity(id: '', name: 'Transaction', type: '', icon: 'default'),
           );

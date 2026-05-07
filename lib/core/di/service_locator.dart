@@ -20,6 +20,7 @@ import '../../features/scanner/domain/repo/scanner_repository.dart';
 import '../../features/scanner/data/repoimpl/scanner_repository_impl.dart';
 import '../../features/scanner/presentation/bloc/scanner_bloc.dart';
 import '../services/biometric_service.dart';
+import '../services/secure_storage_service.dart';
 import '../../features/transactions/data/datasource/transaction_local_datasource.dart';
 import '../../features/wallet/data/datasource/wallet_local_datasource.dart';
 import '../database/database_helper.dart';
@@ -43,13 +44,19 @@ Future<void> init() async {
 
   // Services
   sl.registerLazySingleton(() => BiometricService());
+  sl.registerLazySingleton(() => SecureStorageService());
 
   // Features - Theme
   sl.registerFactory(() => ThemeBloc(themeService: sl()));
 
   // Features - Auth
   sl.registerFactory(
-    () => AuthBloc(loginUseCase: sl(), registerUseCase: sl(), repository: sl()),
+    () => AuthBloc(
+      loginUseCase: sl(),
+      registerUseCase: sl(),
+      repository: sl(),
+      secureStorage: sl(),
+    ),
   );
   sl.registerLazySingleton(() => LoginUseCase(sl()));
   sl.registerLazySingleton(() => RegisterUseCase(sl()));

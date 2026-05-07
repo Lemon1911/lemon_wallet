@@ -263,8 +263,15 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
           backgroundColor: AppColors.primary,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         ),
-        child: const Text('Add Transaction', 
-          style: TextStyle(color: AppColors.backgroundDark, fontWeight: FontWeight.bold, fontSize: 18)),
+        child: BlocBuilder<TransactionBloc, TransactionState>(
+          builder: (context, state) {
+            if (state is TransactionLoading) {
+              return const CircularProgressIndicator(color: AppColors.backgroundDark);
+            }
+            return const Text('Add Transaction', 
+              style: TextStyle(color: AppColors.backgroundDark, fontWeight: FontWeight.bold, fontSize: 18));
+          },
+        ),
       ),
     );
   }

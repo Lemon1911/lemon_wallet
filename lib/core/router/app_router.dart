@@ -2,6 +2,7 @@ import 'package:go_router/go_router.dart';
 import '../../features/auth/presentation/screens/login_screen.dart';
 import '../../features/auth/presentation/screens/register_screen.dart';
 import '../../features/dashboard/presentation/screens/main_screen.dart';
+import '../../features/auth/presentation/screens/splash_screen.dart';
 
 import '../../features/wallet/presentation/screens/create_wallet_screen.dart';
 
@@ -12,6 +13,7 @@ import '../../features/profile/presentation/screens/edit_profile_screen.dart';
 import '../../features/budget/presentation/screens/budget_screen.dart';
 
 class AppRouter {
+  static const String splash = '/splash';
   static const String login = '/login';
   static const String register = '/register';
   static const String home = '/';
@@ -22,8 +24,9 @@ class AppRouter {
   static const String budgets = '/budgets';
 
   static final router = GoRouter(
-    initialLocation: login,
+    initialLocation: splash,
     routes: [
+      GoRoute(path: splash, builder: (context, state) => const SplashScreen()),
       GoRoute(path: login, builder: (context, state) => const LoginScreen()),
       GoRoute(
         path: register,

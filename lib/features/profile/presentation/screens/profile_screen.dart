@@ -54,7 +54,7 @@ class ProfileScreen extends StatelessWidget {
                                   : null,
                               child: user?.avatarUrl == null
                                   ? Text(
-                                      (user?.fullName ?? user?.email ?? 'U')
+                                      (user?.fullName ?? user?.username ?? 'U')
                                           .substring(0, 1)
                                           .toUpperCase(),
                                       style: const TextStyle(
@@ -90,7 +90,7 @@ class ProfileScreen extends StatelessWidget {
                           ),
                     ).animate().fadeIn(delay: 200.ms),
                     Text(
-                      user?.email ?? 'user@example.com',
+                      user?.username ?? 'username',
                       style: TextStyle(
                         color: Colors.white.withValues(alpha: 0.6),
                         fontSize: 16,
