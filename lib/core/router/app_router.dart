@@ -9,6 +9,7 @@ import '../../features/transactions/presentation/screens/add_transaction_screen.
 
 import '../../features/scanner/presentation/screens/scanner_screen.dart';
 import '../../features/profile/presentation/screens/edit_profile_screen.dart';
+import '../../features/budget/presentation/screens/budget_screen.dart';
 
 class AppRouter {
   static const String login = '/login';
@@ -18,6 +19,7 @@ class AppRouter {
   static const String addTransaction = '/add-transaction';
   static const String scanner = '/scanner';
   static const String editProfile = '/edit-profile';
+  static const String budgets = '/budgets';
 
   static final router = GoRouter(
     initialLocation: login,
@@ -58,6 +60,10 @@ class AppRouter {
       GoRoute(
         path: editProfile,
         builder: (context, state) => const EditProfileScreen(),
+      ),
+      GoRoute(
+        path: budgets,
+        builder: (context, state) => const BudgetScreen(),
       ),
     ],
   );

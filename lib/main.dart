@@ -10,6 +10,7 @@ import 'features/auth/presentation/bloc/auth_bloc.dart';
 import 'features/auth/presentation/bloc/auth_event.dart';
 import 'features/wallet/presentation/bloc/wallet_bloc.dart';
 import 'features/transactions/presentation/bloc/transaction_bloc.dart';
+import 'features/budget/presentation/bloc/budget_bloc.dart';
 
 import 'core/di/service_locator.dart' as di;
 
@@ -46,6 +47,9 @@ class MyApp extends StatelessWidget {
         ),
         BlocProvider(
           create: (context) => di.sl<TransactionBloc>(),
+        ),
+        BlocProvider(
+          create: (context) => di.sl<BudgetBloc>(),
         ),
       ],
       child: BlocBuilder<ThemeBloc, ThemeState>(

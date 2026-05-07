@@ -38,3 +38,20 @@ class AddTransaction extends TransactionEvent {
   @override
   List<Object?> get props => [walletId, categoryId, amount, type, note, transactionDate];
 }
+
+class FilterTransactions extends TransactionEvent {
+  final String? searchQuery;
+  final String? categoryId;
+  final DateTime? startDate;
+  final DateTime? endDate;
+
+  const FilterTransactions({
+    this.searchQuery,
+    this.categoryId,
+    this.startDate,
+    this.endDate,
+  });
+
+  @override
+  List<Object?> get props => [searchQuery, categoryId, startDate, endDate];
+}

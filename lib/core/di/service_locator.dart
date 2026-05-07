@@ -24,6 +24,12 @@ import '../../features/transactions/data/datasource/transaction_local_datasource
 import '../../features/wallet/data/datasource/wallet_local_datasource.dart';
 import '../database/database_helper.dart';
 
+import '../../features/budget/data/datasources/budget_local_datasource.dart';
+import '../../features/budget/data/repoimpl/budget_repository_impl.dart';
+import '../../features/budget/domain/repositories/budget_repository.dart';
+import '../../features/budget/domain/usecases/budget_usecases.dart';
+import '../../features/budget/presentation/bloc/budget_bloc.dart';
+
 import '../theme/theme_bloc.dart';
 import '../theme/theme_service.dart';
 
@@ -90,6 +96,22 @@ Future<void> init() async {
   // Features - Scanner
   sl.registerFactory(() => ScannerBloc(scannerRepository: sl()));
   sl.registerLazySingleton<ScannerRepository>(() => ScannerRepositoryImpl());
+
+  // Features - Budget
+  sl.registerFactory(() => BudgetBloc(
+        getBudgetsUseCase: sl(),
+        addBudgetUseCase: sl(),
+        deleteBudgetUseCase: sl(),
+      ));
+  sl.registerLazySingleton(() => GetBudgetsUseCase(sl()));
+  sl.registerLazySingleton(() => AddBudgetUseCase(sl()));
+  sl.registerLazySingleton(() => DeleteBudgetUseCase(sl()));
+  sl.registerLazySingleton<BudgetRepository>(
+    () => BudgetRepositoryImpl(localDataSource: sl()),
+  );
+  sl.registerLazySingleton<BudgetLocalDataSource>(
+    () => BudgetLocalDataSourceImpl(sl()),
+  );
 
   // External
   sl.registerLazySingleton(() => Supabase.instance.client);

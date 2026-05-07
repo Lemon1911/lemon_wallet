@@ -65,6 +65,18 @@ class DatabaseHelper {
         FOREIGN KEY (category_id) REFERENCES categories (id)
       )
     ''');
+
+    // Budgets Table
+    await db.execute('''
+      CREATE TABLE budgets (
+        id TEXT PRIMARY KEY,
+        category_id TEXT,
+        amount_limit REAL,
+        period TEXT,
+        start_date TEXT,
+        FOREIGN KEY (category_id) REFERENCES categories (id)
+      )
+    ''');
   }
 
   Future<void> clearDatabase() async {

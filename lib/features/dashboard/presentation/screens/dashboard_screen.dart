@@ -16,6 +16,9 @@ import '../../../transactions/presentation/bloc/transaction_bloc.dart';
 import '../../../transactions/presentation/bloc/transaction_event.dart';
 import '../../../transactions/presentation/bloc/transaction_state.dart';
 import '../../../transactions/domain/entities/category_entity.dart';
+import '../../../budget/presentation/bloc/budget_bloc.dart';
+import '../../../budget/presentation/bloc/budget_state.dart';
+import '../../../budget/presentation/bloc/budget_event.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -42,6 +45,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           if (_loadedWalletId != walletId) {
             _loadedWalletId = walletId;
             context.read<TransactionBloc>().add(LoadTransactions(walletId));
+            context.read<BudgetBloc>().add(LoadBudgets());
           }
         }
       },
@@ -88,6 +92,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         _buildQuickActions(context, state is WalletsLoaded ? state.wallets : []),
                         const SizedBox(height: 32),
                         _buildSpendingChart(transactions),
+                        const SizedBox(height: 32),
+                        _buildBudgetSummary(context, transactions, categories),
                         const SizedBox(height: 32),
                         _buildRecentActivity(transactions, categories),
                       ],
@@ -491,6 +497,75 @@ class _DashboardScreenState extends State<DashboardScreen> {
         ],
       ),
     ).animate().fadeIn(delay: 600.ms, duration: 800.ms);
+  }
+
+  Widget _buildBudgetSummary(BuildContext context, List<TransactionEntity> transactions, List<CategoryEntity> categories) {
+    return BlocBuilder<BudgetBloc, BudgetState>(
+      builder: (context, state) {
+        if (state is BudgetsLoaded && state.budgets.isNotEmpty) {
+          final budget = state.budgets.first; // Show the most important or first one
+          final category = categories.firstWhere(
+            (c) => c.id == budget.categoryId,
+            orElse: () => const CategoryEntity(id: '', name: 'Unknown', type: '', icon: 'default'),
+          );
+          
+          final spent = transactions
+              .where((tx) => tx.categoryId == budget.categoryId && tx.type == TransactionType.expense)
+              .fold(0.0, (sum, tx) => sum + tx.amount);
+          
+          final percent = (spent / budget.amountLimit).clamp(0.0, 1.0);
+
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    'Budget Status',
+                    style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                  GestureDetector(
+                    onTap: () => context.push(AppRouter.budgets),
+                    child: const Text('View All', style: TextStyle(color: AppColors.primary, fontSize: 14)),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              GlassCard(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(category.name, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                        Text('\$${spent.toStringAsFixed(0)} / \$${budget.amountLimit.toStringAsFixed(0)}', 
+                          style: const TextStyle(color: AppColors.textSecondaryDark, fontSize: 12)),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(10),
+                      child: LinearProgressIndicator(
+                        value: percent,
+                        minHeight: 6,
+                        backgroundColor: Colors.white.withValues(alpha: 0.05),
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          spent > budget.amountLimit ? Colors.redAccent : AppColors.primary,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          );
+        }
+        return const SizedBox.shrink();
+      },
+    );
   }
 
   Widget _buildRecentActivity(List<TransactionEntity> transactions, List<CategoryEntity> categories) {

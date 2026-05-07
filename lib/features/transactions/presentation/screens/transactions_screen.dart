@@ -12,16 +12,38 @@ import '../bloc/transaction_state.dart';
 import '../../domain/entities/transaction_entity.dart';
 import '../../domain/entities/category_entity.dart';
 
-class TransactionsScreen extends StatelessWidget {
+class TransactionsScreen extends StatefulWidget {
   const TransactionsScreen({super.key});
+
+  @override
+  State<TransactionsScreen> createState() => _TransactionsScreenState();
+}
+
+class _TransactionsScreenState extends State<TransactionsScreen> {
+  final TextEditingController _searchController = TextEditingController();
+  String? _selectedCategoryId;
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  void _onFilterChanged() {
+    context.read<TransactionBloc>().add(FilterTransactions(
+          searchQuery: _searchController.text,
+          categoryId: _selectedCategoryId,
+        ));
+  }
 
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<WalletBloc, WalletState>(
       builder: (context, walletState) {
         if (walletState is WalletsLoaded && walletState.wallets.isNotEmpty) {
-          final walletId = walletState.wallets.first.id;
-          context.read<TransactionBloc>().add(LoadTransactions(walletId));
+          // Only load if not already loaded or if wallet changed
+          // For simplicity, we load here, but typically you'd trigger this elsewhere
+          // context.read<TransactionBloc>().add(LoadTransactions(walletId));
           
           return BlocBuilder<TransactionBloc, TransactionState>(
             builder: (context, state) {
@@ -29,9 +51,6 @@ class TransactionsScreen extends StatelessWidget {
                 return const Center(child: CircularProgressIndicator());
               }
               if (state is TransactionsLoaded) {
-                if (state.transactions.isEmpty) {
-                  return _buildEmptyState();
-                }
                 return _buildTransactionList(state.transactions, state.categories);
               }
               return const Center(child: Text('Load transactions...'));
@@ -50,7 +69,16 @@ class TransactionsScreen extends StatelessWidget {
         children: [
           const Icon(Icons.receipt_long_rounded, size: 64, color: Colors.white24),
           const SizedBox(height: 16),
-          Text('No transactions yet', style: TextStyle(color: AppColors.textSecondaryDark)),
+          Text('No transactions found', style: TextStyle(color: AppColors.textSecondaryDark)),
+          if (_searchController.text.isNotEmpty || _selectedCategoryId != null)
+            TextButton(
+              onPressed: () {
+                _searchController.clear();
+                setState(() => _selectedCategoryId = null);
+                _onFilterChanged();
+              },
+              child: const Text('Clear Filters', style: TextStyle(color: AppColors.primary)),
+            ),
         ],
       ),
     );
@@ -68,29 +96,31 @@ class TransactionsScreen extends StatelessWidget {
               _buildHeader(transactions),
               const SizedBox(height: 24),
               _buildSearchBar(),
-              const SizedBox(height: 32),
-              ...transactions.map((tx) {
-                final category = categories.firstWhere(
-                  (c) => c.id == tx.categoryId,
-                  orElse: () => const CategoryEntity(id: '', name: 'Transaction', type: '', icon: 'default'),
-                );
-                return _buildTransactionItem(
-                  icon: IconHelper.getIconData(category.icon),
-                  title: tx.note.isEmpty ? category.name : tx.note,
-                  time: '${tx.transactionDate.day}/${tx.transactionDate.month}',
-                  amount: '${tx.type == TransactionType.income ? '+' : '-'} \$${tx.amount.toStringAsFixed(2)}',
-                  isPositive: tx.type == TransactionType.income,
-                );
-              }),
+              const SizedBox(height: 16),
+              _buildFilterChips(categories),
+              const SizedBox(height: 24),
+              if (transactions.isEmpty)
+                _buildEmptyState()
+              else
+                ...transactions.map((tx) {
+                  final category = categories.firstWhere(
+                    (c) => c.id == tx.categoryId,
+                    orElse: () => const CategoryEntity(id: '', name: 'Transaction', type: '', icon: 'default'),
+                  );
+                  return _buildTransactionItem(
+                    icon: IconHelper.getIconData(category.icon),
+                    title: tx.note.isEmpty ? category.name : tx.note,
+                    time: '${tx.transactionDate.day}/${tx.transactionDate.month}',
+                    amount: '${tx.type == TransactionType.income ? '+' : '-'} \$${tx.amount.toStringAsFixed(2)}',
+                    isPositive: tx.type == TransactionType.income,
+                  );
+                }),
             ],
           ),
         ),
       ),
     );
   }
-
-  // Icon mapping moved to IconHelper
-
 
   Widget _buildHeader(List<TransactionEntity> transactions) {
     return Row(
@@ -111,16 +141,6 @@ class TransactionsScreen extends StatelessWidget {
               icon: const Icon(Icons.ios_share_rounded, color: AppColors.primary),
               onPressed: () => CsvHelper.exportTransactionsToCsv(transactions),
             ),
-            const SizedBox(width: 8),
-            GlassCard(
-              padding: const EdgeInsets.all(10),
-              borderRadius: BorderRadius.circular(12),
-              child: const Icon(
-                Icons.filter_list_rounded,
-                color: Colors.white,
-                size: 20,
-              ),
-            ),
           ],
         ),
       ],
@@ -131,15 +151,26 @@ class TransactionsScreen extends StatelessWidget {
     return GlassCard(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
           borderRadius: BorderRadius.circular(50),
-          child: const TextField(
-            style: TextStyle(color: Colors.white),
+          child: TextField(
+            controller: _searchController,
+            onChanged: (_) => _onFilterChanged(),
+            style: const TextStyle(color: Colors.white),
             decoration: InputDecoration(
               hintText: 'Search transactions...',
-              hintStyle: TextStyle(color: AppColors.textSecondaryDark),
-              prefixIcon: Icon(
+              hintStyle: const TextStyle(color: AppColors.textSecondaryDark),
+              prefixIcon: const Icon(
                 Icons.search_rounded,
                 color: AppColors.textSecondaryDark,
               ),
+              suffixIcon: _searchController.text.isNotEmpty 
+                ? IconButton(
+                    icon: const Icon(Icons.clear_rounded, color: AppColors.textSecondaryDark, size: 20),
+                    onPressed: () {
+                      _searchController.clear();
+                      _onFilterChanged();
+                    },
+                  )
+                : null,
               border: InputBorder.none,
             ),
           ),
@@ -147,6 +178,55 @@ class TransactionsScreen extends StatelessWidget {
         .animate()
         .fadeIn(delay: 200.ms, duration: 600.ms)
         .scale(begin: const Offset(0.95, 0.95));
+  }
+
+  Widget _buildFilterChips(List<CategoryEntity> categories) {
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(right: 8),
+            child: ChoiceChip(
+              label: const Text('All'),
+              selected: _selectedCategoryId == null,
+              onSelected: (selected) {
+                if (selected) {
+                  setState(() => _selectedCategoryId = null);
+                  _onFilterChanged();
+                }
+              },
+              backgroundColor: Colors.white.withValues(alpha: 0.05),
+              selectedColor: AppColors.primary,
+              labelStyle: TextStyle(
+                color: _selectedCategoryId == null ? AppColors.backgroundDark : Colors.white70,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+          ...categories.map((category) {
+            final isSelected = _selectedCategoryId == category.id;
+            return Padding(
+              padding: const EdgeInsets.only(right: 8),
+              child: ChoiceChip(
+                label: Text(category.name),
+                selected: isSelected,
+                onSelected: (selected) {
+                  setState(() => _selectedCategoryId = selected ? category.id : null);
+                  _onFilterChanged();
+                },
+                backgroundColor: Colors.white.withValues(alpha: 0.05),
+                selectedColor: AppColors.primary,
+                labelStyle: TextStyle(
+                  color: isSelected ? AppColors.backgroundDark : Colors.white70,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            );
+          }),
+        ],
+      ),
+    ).animate().fadeIn(delay: 300.ms);
   }
 
   Widget _buildTransactionItem({
@@ -159,7 +239,7 @@ class TransactionsScreen extends StatelessWidget {
     return Padding(
           padding: const EdgeInsets.only(bottom: 12),
           child: GlassCard(
-            hasBlur: false, // Performance optimization for lists
+            hasBlur: false,
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
             child: Row(
               children: [
@@ -185,7 +265,7 @@ class TransactionsScreen extends StatelessWidget {
                       ),
                       Text(
                         time,
-                        style: TextStyle(
+                        style: const TextStyle(
                           color: AppColors.textSecondaryDark,
                           fontSize: 12,
                         ),

@@ -1,4 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../domain/entities/transaction_entity.dart';
 import '../../domain/entities/category_entity.dart';
 import '../../domain/usecase/transaction_usecases.dart';
 import 'transaction_event.dart';
@@ -10,6 +11,7 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
   final GetCategoriesUseCase _getCategoriesUseCase;
   
   List<CategoryEntity>? _cachedCategories;
+  List<TransactionEntity> _allTransactions = [];
 
   TransactionBloc({
     required GetTransactionsUseCase getTransactionsUseCase,
@@ -22,6 +24,7 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
     on<LoadTransactions>(_onLoadTransactions);
     on<LoadCategories>(_onLoadCategories);
     on<AddTransaction>(_onAddTransaction);
+    on<FilterTransactions>(_onFilterTransactions);
   }
 
   Future<void> _onLoadCategories(
@@ -56,8 +59,38 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
     final result = await _getTransactionsUseCase(walletId: event.walletId);
     result.fold(
       (failure) => emit(TransactionError(failure)),
-      (transactions) => emit(TransactionsLoaded(transactions, _cachedCategories ?? [])),
+      (transactions) {
+        _allTransactions = transactions;
+        emit(TransactionsLoaded(transactions, _cachedCategories ?? []));
+      },
     );
+  }
+
+  void _onFilterTransactions(FilterTransactions event, Emitter<TransactionState> emit) {
+    if (state is! TransactionsLoaded && state is! TransactionInitial) return;
+
+    List<TransactionEntity> filtered = _allTransactions;
+
+    if (event.searchQuery != null && event.searchQuery!.isNotEmpty) {
+      final query = event.searchQuery!.toLowerCase();
+      filtered = filtered.where((tx) => 
+        tx.note.toLowerCase().contains(query)
+      ).toList();
+    }
+
+    if (event.categoryId != null) {
+      filtered = filtered.where((tx) => tx.categoryId == event.categoryId).toList();
+    }
+
+    if (event.startDate != null) {
+      filtered = filtered.where((tx) => tx.transactionDate.isAfter(event.startDate!)).toList();
+    }
+
+    if (event.endDate != null) {
+      filtered = filtered.where((tx) => tx.transactionDate.isBefore(event.endDate!)).toList();
+    }
+
+    emit(TransactionsLoaded(filtered, _cachedCategories ?? []));
   }
 
   Future<void> _onAddTransaction(
