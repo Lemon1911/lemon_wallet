@@ -4,6 +4,8 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/custom_components.dart';
 import '../bloc/wallet_bloc.dart';
+import '../../../../core/services/currency_service.dart';
+import '../../../../core/di/service_locator.dart';
 
 class CreateWalletScreen extends StatefulWidget {
   const CreateWalletScreen({super.key});
@@ -68,28 +70,45 @@ class _CreateWalletScreenState extends State<CreateWalletScreen> {
                 style: TextStyle(color: AppColors.textSecondaryDark, fontSize: 16),
               ),
               const SizedBox(height: 12),
-              Wrap(
-                spacing: 12,
-                children: ['USD', 'EUR', 'GBP', 'EGP'].map((currency) {
-                  final isSelected = _selectedCurrency == currency;
-                  return GestureDetector(
-                    onTap: () => setState(() => _selectedCurrency = currency),
-                    child: GlassCard(
-                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                      borderRadius: BorderRadius.circular(30),
-                      border: isSelected 
-                          ? Border.all(color: AppColors.primary, width: 2)
-                          : null,
-                      child: Text(
-                        currency,
-                        style: TextStyle(
-                          color: isSelected ? AppColors.primary : Colors.white,
-                          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  children: sl<CurrencyService>().getAllCurrencies().map((currency) {
+                    final isSelected = _selectedCurrency == currency.code;
+                    return GestureDetector(
+                      onTap: () => setState(() => _selectedCurrency = currency.code),
+                      child: Container(
+                        margin: const EdgeInsets.only(right: 12),
+                        child: GlassCard(
+                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                          borderRadius: BorderRadius.circular(30),
+                          border: isSelected 
+                              ? Border.all(color: AppColors.primary, width: 2)
+                              : null,
+                          child: Row(
+                            children: [
+                              Text(
+                                currency.symbol,
+                                style: TextStyle(
+                                  color: isSelected ? AppColors.primary : Colors.white70,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                currency.code,
+                                style: TextStyle(
+                                  color: isSelected ? AppColors.primary : Colors.white,
+                                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
-                    ),
-                  );
-                }).toList(),
+                    );
+                  }).toList(),
+                ),
               ),
               const Spacer(),
               SizedBox(

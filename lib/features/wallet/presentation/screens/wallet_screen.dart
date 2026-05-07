@@ -7,6 +7,8 @@ import '../../../../core/widgets/custom_components.dart';
 import '../../../../core/router/app_router.dart';
 import '../bloc/wallet_bloc.dart';
 import '../../domain/entities/wallet_entity.dart';
+import '../../../../core/services/currency_service.dart';
+import '../../../../core/di/service_locator.dart';
 
 class WalletScreen extends StatefulWidget {
   const WalletScreen({super.key});
@@ -223,7 +225,7 @@ class _WalletScreenState extends State<WalletScreen> {
           const SizedBox(height: 24),
           _buildDetailRow('Wallet ID', wallet.id.toUpperCase()),
           const Divider(color: AppColors.glassBorder, height: 24),
-          _buildDetailRow('Currency', wallet.currency),
+          _buildDetailRow('Currency', '${wallet.currency} (${sl<CurrencyService>().getSymbol(wallet.currency)})'),
           const Divider(color: AppColors.glassBorder, height: 24),
           _buildDetailRow('Created At', '${wallet.createdAt.day}/${wallet.createdAt.month}/${wallet.createdAt.year}'),
           const SizedBox(height: 24),

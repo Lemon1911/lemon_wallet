@@ -10,6 +10,8 @@ import '../bloc/transaction_event.dart';
 import '../bloc/transaction_state.dart';
 import '../../../wallet/presentation/bloc/wallet_bloc.dart';
 import '../../../../core/utils/icon_helper.dart';
+import '../../../../core/services/currency_service.dart';
+import '../../../../core/di/service_locator.dart';
 
 class AddTransactionScreen extends StatefulWidget {
   final String walletId;
@@ -154,7 +156,16 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
         const SizedBox(height: 12),
         Row(
           children: [
-            const Text('\$', style: TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.bold)),
+            BlocBuilder<WalletBloc, WalletState>(
+              builder: (context, state) {
+                String symbol = '\$';
+                if (state is WalletsLoaded) {
+                  final wallet = state.wallets.firstWhere((w) => w.id == widget.walletId, orElse: () => state.wallets.first);
+                  symbol = sl<CurrencyService>().getSymbol(wallet.currency);
+                }
+                return Text(symbol, style: const TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.bold));
+              },
+            ),
             const SizedBox(width: 12),
             Expanded(
               child: TextField(

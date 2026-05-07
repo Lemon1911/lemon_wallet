@@ -24,6 +24,7 @@ import '../services/secure_storage_service.dart';
 import '../../features/transactions/data/datasource/transaction_local_datasource.dart';
 import '../../features/wallet/data/datasource/wallet_local_datasource.dart';
 import '../database/database_helper.dart';
+import '../services/currency_service.dart';
 
 import '../../features/budget/data/datasources/budget_local_datasource.dart';
 import '../../features/budget/data/datasources/budget_remote_datasource.dart';
@@ -45,6 +46,7 @@ Future<void> init() async {
   // Services
   sl.registerLazySingleton(() => BiometricService());
   sl.registerLazySingleton(() => SecureStorageService());
+  sl.registerLazySingleton(() => CurrencyService());
 
   // Features - Theme
   sl.registerFactory(() => ThemeBloc(themeService: sl()));

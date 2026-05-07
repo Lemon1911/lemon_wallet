@@ -9,6 +9,9 @@ import '../../../../features/transactions/domain/entities/transaction_entity.dar
 import '../../domain/services/insights_service.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../../../../core/widgets/custom_components.dart';
+import '../../../../core/services/currency_service.dart';
+import '../../../../core/di/service_locator.dart';
+import '../../../../features/wallet/presentation/bloc/wallet_bloc.dart';
 
 class InsightsScreen extends StatelessWidget {
   const InsightsScreen({super.key});
@@ -23,8 +26,26 @@ class InsightsScreen extends StatelessWidget {
             if (state is TransactionLoading) {
               return const Center(child: CircularProgressIndicator(color: AppColors.primary));
             } else if (state is TransactionsLoaded) {
-              final transactions = state.transactions;
-              return _buildContent(context, transactions);
+              return BlocBuilder<WalletBloc, WalletState>(
+                builder: (context, walletState) {
+                  String currencyCode = 'USD';
+                  if (walletState is WalletsLoaded && walletState.wallets.isNotEmpty) {
+                    // We assume the transactions are for the first/selected wallet in real app logic
+                    // For now, we'll try to find the wallet that matches the first transaction's walletId
+                    if (state.transactions.isNotEmpty) {
+                      final wallet = walletState.wallets.firstWhere(
+                        (w) => w.id == state.transactions.first.walletId,
+                        orElse: () => walletState.wallets.first,
+                      );
+                      currencyCode = wallet.currency;
+                    } else {
+                      currencyCode = walletState.wallets.first.currency;
+                    }
+                  }
+                  
+                  return _buildContent(context, state.transactions, currencyCode);
+                },
+              );
             } else {
               return const Center(child: Text('No data available', style: TextStyle(color: Colors.white)));
             }
@@ -34,13 +55,14 @@ class InsightsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildContent(BuildContext context, List<TransactionEntity> transactions) {
+  Widget _buildContent(BuildContext context, List<TransactionEntity> transactions, String currencyCode) {
     final expenses = transactions.where((t) => t.type == TransactionType.expense).toList();
     final income = transactions.where((t) => t.type == TransactionType.income).toList();
 
     final totalExpense = expenses.fold(0.0, (sum, item) => sum + item.amount);
     final totalIncome = income.fold(0.0, (sum, item) => sum + item.amount);
     final balance = totalIncome - totalExpense;
+    final symbol = sl<CurrencyService>().getSymbol(currencyCode);
 
     return CustomScrollView(
       slivers: [
@@ -55,11 +77,11 @@ class InsightsScreen extends StatelessWidget {
                   style: TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 24),
-                _buildSummaryCards(totalIncome, totalExpense, balance),
+                _buildSummaryCards(totalIncome, totalExpense, balance, symbol),
                 const SizedBox(height: 32),
                 _buildSectionHeader('Spending by Category'),
                 const SizedBox(height: 16),
-                _buildCategoryPieChart(expenses),
+                _buildCategoryPieChart(expenses, symbol),
                 const SizedBox(height: 32),
                 _buildSectionHeader('AI Recommendations'),
                 const SizedBox(height: 16),
@@ -84,13 +106,13 @@ class InsightsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildSummaryCards(double income, double expense, double balance) {
+  Widget _buildSummaryCards(double income, double expense, double balance, String symbol) {
     return Row(
       children: [
         Expanded(
           child: _buildSummaryItem(
             'Income',
-            '\$${NumberFormat("#,##0").format(income)}',
+            '$symbol${NumberFormat("#,##0").format(income)}',
             AppColors.secondary,
             Icons.arrow_upward,
           ),
@@ -99,7 +121,7 @@ class InsightsScreen extends StatelessWidget {
         Expanded(
           child: _buildSummaryItem(
             'Expense',
-            '\$${NumberFormat("#,##0").format(expense)}',
+            '$symbol${NumberFormat("#,##0").format(expense)}',
             AppColors.error,
             Icons.arrow_downward,
           ),
@@ -133,7 +155,7 @@ class InsightsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildCategoryPieChart(List<TransactionEntity> expenses) {
+  Widget _buildCategoryPieChart(List<TransactionEntity> expenses, String symbol) {
     if (expenses.isEmpty) {
       return const Center(child: Text('No expenses recorded', style: TextStyle(color: Colors.white70)));
     }
@@ -187,7 +209,7 @@ class InsightsScreen extends StatelessWidget {
                       Container(width: 12, height: 12, decoration: BoxDecoration(color: _getChartColor(entry.key), shape: BoxShape.circle)),
                       const SizedBox(width: 8),
                       Expanded(child: Text('Category', style: const TextStyle(color: Colors.white, fontSize: 12), overflow: TextOverflow.ellipsis)),
-                      Text('\$${entry.value.value.toInt()}', style: const TextStyle(color: Colors.white70, fontSize: 12)),
+                      Text('$symbol${entry.value.value.toInt()}', style: const TextStyle(color: Colors.white70, fontSize: 12)),
                     ],
                   ),
                 );

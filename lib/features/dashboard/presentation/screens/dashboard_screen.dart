@@ -19,6 +19,8 @@ import '../../../transactions/domain/entities/category_entity.dart';
 import '../../../budget/presentation/bloc/budget_bloc.dart';
 import '../../../budget/presentation/bloc/budget_state.dart';
 import '../../../budget/presentation/bloc/budget_event.dart';
+import '../../../../core/services/currency_service.dart';
+import '../../../../core/di/service_locator.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -257,7 +259,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              selectedWallet.currency == 'USD' ? '\$' : selectedWallet.currency,
+              sl<CurrencyService>().getSymbol(selectedWallet.currency),
               style: TextStyle(
                 color: AppColors.primary.withValues(alpha: 0.7),
                 fontSize: 24,
