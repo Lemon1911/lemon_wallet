@@ -15,6 +15,7 @@ import '../../features/wallet/data/datasource/wallet_remote_datasource.dart';
 import '../../features/wallet/data/repoimpl/wallet_repository_impl.dart';
 import '../../features/wallet/domain/repo/wallet_repository.dart';
 import '../../features/wallet/domain/usecase/wallet_usecases.dart';
+import '../../features/wallet/domain/usecases/invite_member_usecase.dart';
 import '../../features/wallet/presentation/bloc/wallet_bloc.dart';
 import '../../features/scanner/domain/repo/scanner_repository.dart';
 import '../../features/scanner/data/repoimpl/scanner_repository_impl.dart';
@@ -90,9 +91,11 @@ Future<void> init() async {
   sl.registerFactory(() => WalletBloc(
         getWalletsUseCase: sl(),
         createWalletUseCase: sl(),
+        inviteMemberUseCase: sl(),
       ));
   sl.registerLazySingleton(() => CreateWalletUseCase(sl()));
   sl.registerLazySingleton(() => GetWalletsUseCase(sl()));
+  sl.registerLazySingleton(() => InviteMemberUseCase(sl()));
   sl.registerLazySingleton<WalletRepository>(
     () => WalletRepositoryImpl(sl(), sl()),
   );

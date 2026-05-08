@@ -44,6 +44,8 @@ class _WalletScreenState extends State<WalletScreen> {
                   if (wallets.isNotEmpty) ...[
                     _buildVirtualCardDetails(wallets[_currentWalletIndex]),
                     const SizedBox(height: 32),
+                    _buildCollaborators(wallets[_currentWalletIndex]),
+                    const SizedBox(height: 32),
                   ],
                   _buildLinkedBanks(),
                 ],
@@ -354,6 +356,153 @@ class _WalletScreenState extends State<WalletScreen> {
             ),
             const Icon(Icons.chevron_right, color: Colors.white24),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCollaborators(WalletEntity wallet) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            const Text(
+              'Collaborators',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            TextButton.icon(
+              onPressed: () => _showInviteDialog(context, wallet),
+              icon: const Icon(Icons.person_add_rounded, size: 18),
+              label: const Text('Invite'),
+              style: TextButton.styleFrom(foregroundColor: AppColors.primary),
+            ),
+          ],
+        ),
+        const SizedBox(height: 16),
+        if (wallet.members.isEmpty)
+          const Center(
+            child: Text(
+              'No collaborators yet',
+              style: TextStyle(color: Colors.white38, fontSize: 14),
+            ),
+          )
+        else
+          ...wallet.members.map((member) => _buildMemberItem(member)),
+      ],
+    );
+  }
+
+  Widget _buildMemberItem(dynamic member) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: GlassCard(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: AppColors.primary.withValues(alpha: 0.1),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.person, color: AppColors.primary, size: 20),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    member.fullName ?? member.username ?? 'Member',
+                    style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                  ),
+                  Text(
+                    member.role.name.toUpperCase(),
+                    style: TextStyle(color: AppColors.textSecondaryDark, fontSize: 10, letterSpacing: 1),
+                  ),
+                ],
+              ),
+            ),
+            const Icon(Icons.more_vert, color: Colors.white24),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showInviteDialog(BuildContext context, WalletEntity wallet) {
+    final controller = TextEditingController();
+    String selectedRole = 'viewer';
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setModalState) => Padding(
+          padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+          child: GlassCard(
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+            padding: const EdgeInsets.all(32),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text('Invite Member', style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold)),
+                const SizedBox(height: 8),
+                Text('Invite a user to collaborate on ${wallet.name}', style: TextStyle(color: AppColors.textSecondaryDark)),
+                const SizedBox(height: 24),
+                TextField(
+                  controller: controller,
+                  style: const TextStyle(color: Colors.white),
+                  decoration: const InputDecoration(
+                    labelText: 'Username or Email',
+                    labelStyle: TextStyle(color: Colors.white70),
+                    prefixIcon: Icon(Icons.alternate_email_rounded, color: AppColors.primary),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                DropdownButtonFormField<String>(
+                  value: selectedRole,
+                  dropdownColor: AppColors.backgroundDark,
+                  decoration: const InputDecoration(labelText: 'Role', labelStyle: TextStyle(color: Colors.white70)),
+                  items: ['admin', 'viewer'].map((role) => DropdownMenuItem(value: role, child: Text(role.toUpperCase(), style: const TextStyle(color: Colors.white)))).toList(),
+                  onChanged: (val) => setModalState(() => selectedRole = val!),
+                ),
+                const SizedBox(height: 32),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      if (controller.text.isNotEmpty) {
+                        context.read<WalletBloc>().add(InviteMember(
+                          walletId: wallet.id,
+                          emailOrUsername: controller.text,
+                          role: selectedRole,
+                        ));
+                        Navigator.pop(context);
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Sending invitation...')),
+                        );
+                      }
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                    ),
+                    child: const Text('Send Invitation', style: TextStyle(color: AppColors.backgroundDark, fontWeight: FontWeight.bold)),
+                  ),
+                ),
+              ],
+            ),
+          ),
         ),
       ),
     );

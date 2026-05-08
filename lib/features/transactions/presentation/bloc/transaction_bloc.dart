@@ -108,7 +108,13 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
     );
     result.fold(
       (failure) => emit(TransactionError(failure)),
-      (_) => emit(TransactionSuccess()),
+      (transaction) {
+        // Update local list for immediate UI response
+        _allTransactions.insert(0, transaction);
+        emit(TransactionSuccess());
+        // Emit loaded state so listeners update their UI
+        emit(TransactionsLoaded(_allTransactions, _cachedCategories ?? []));
+      },
     );
   }
 }

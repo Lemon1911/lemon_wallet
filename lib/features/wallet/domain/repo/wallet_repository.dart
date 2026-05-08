@@ -5,4 +5,5 @@ abstract class WalletRepository {
   Future<Either<String, List<WalletEntity>>> getWallets();
   Future<Either<String, WalletEntity>> createWallet({required String name, required String currency});
   Future<Either<String, void>> deleteWallet(String walletId);
+  Future<Either<String, void>> inviteMember(String walletId, String emailOrUsername, String role);
 }

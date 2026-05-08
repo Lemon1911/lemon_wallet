@@ -396,12 +396,17 @@ class _DashboardScreenState extends State<DashboardScreen> {
           _ActionPill(
             icon: Icons.add_rounded, 
             label: 'Income',
-            onTap: () {
+            onTap: () async {
               if (currentWalletId != null) {
-                context.push(AppRouter.addTransaction, extra: {
+                await context.push(AppRouter.addTransaction, extra: {
                   'walletId': currentWalletId,
                   'type': TransactionType.income,
                 });
+                // Refresh wallet balance and budgets after adding transaction
+                if (context.mounted) {
+                  context.read<WalletBloc>().add(LoadWallets());
+                  context.read<BudgetBloc>().add(LoadBudgets());
+                }
               }
             },
           ),
@@ -409,12 +414,17 @@ class _DashboardScreenState extends State<DashboardScreen> {
           _ActionPill(
             icon: Icons.payment_rounded, 
             label: 'Pay',
-            onTap: () {
+            onTap: () async {
               if (currentWalletId != null) {
-                context.push(AppRouter.addTransaction, extra: {
+                await context.push(AppRouter.addTransaction, extra: {
                   'walletId': currentWalletId,
                   'type': TransactionType.expense,
                 });
+                // Refresh wallet balance and budgets after adding transaction
+                if (context.mounted) {
+                  context.read<WalletBloc>().add(LoadWallets());
+                  context.read<BudgetBloc>().add(LoadBudgets());
+                }
               }
             },
           ),
@@ -549,8 +559,17 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(category.name, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-                        Text('\$${spent.toStringAsFixed(0)} / \$${budget.amountLimit.toStringAsFixed(0)}', 
-                          style: const TextStyle(color: AppColors.textSecondaryDark, fontSize: 12)),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            Text('\$${spent.toStringAsFixed(0)} / \$${budget.amountLimit.toStringAsFixed(0)}', 
+                              style: const TextStyle(color: AppColors.textSecondaryDark, fontSize: 12)),
+                            if (spent > budget.amountLimit)
+                              const Text('Over!', style: TextStyle(color: Colors.redAccent, fontSize: 10, fontWeight: FontWeight.bold))
+                            else if (percent > 0.8)
+                              const Text('Near!', style: TextStyle(color: Colors.orangeAccent, fontSize: 10, fontWeight: FontWeight.bold)),
+                          ],
+                        ),
                       ],
                     ),
                     const SizedBox(height: 12),
@@ -611,7 +630,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           );
           
           return _ActivityItem(
-            icon: IconHelper.getIconData(category.icon),
+            icon: IconHelper.getIconData(category.icon, category.name),
             title: tx.note.isEmpty ? category.name : tx.note,
             subtitle: '${tx.transactionDate.day}/${tx.transactionDate.month}/${tx.transactionDate.year}',
             amount: '${tx.type == TransactionType.income ? '+' : '-'} \$${tx.amount.toStringAsFixed(2)}',

@@ -1,4 +1,5 @@
 import '../../domain/entities/wallet_entity.dart';
+import 'wallet_member_model.dart';
 
 class WalletModel extends WalletEntity {
   const WalletModel({
@@ -7,6 +8,7 @@ class WalletModel extends WalletEntity {
     required super.currency,
     required super.ownerId,
     required super.createdAt,
+    super.members,
   });
 
   factory WalletModel.fromJson(Map<String, dynamic> json) {
@@ -18,6 +20,11 @@ class WalletModel extends WalletEntity {
       createdAt: json['created_at'] != null 
           ? DateTime.parse(json['created_at'].toString())
           : DateTime.now(),
+      members: json['wallet_members'] != null
+          ? (json['wallet_members'] as List)
+              .map((m) => WalletMemberModel.fromJson(m))
+              .toList()
+          : [],
     );
   }
 

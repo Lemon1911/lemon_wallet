@@ -108,7 +108,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
                     orElse: () => const CategoryEntity(id: '', name: 'Transaction', type: '', icon: 'default'),
                   );
                   return _buildTransactionItem(
-                    icon: IconHelper.getIconData(category.icon),
+                    icon: IconHelper.getIconData(category.icon, category.name),
                     title: tx.note.isEmpty ? category.name : tx.note,
                     time: '${tx.transactionDate.day}/${tx.transactionDate.month}',
                     amount: '${tx.type == TransactionType.income ? '+' : '-'} \$${tx.amount.toStringAsFixed(2)}',

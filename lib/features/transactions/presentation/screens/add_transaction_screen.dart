@@ -209,7 +209,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(IconHelper.getIconData(cat.icon), color: isSelected ? AppColors.primary : Colors.white70, size: 18),
+                      Icon(IconHelper.getIconData(cat.icon, cat.name), color: isSelected ? AppColors.primary : Colors.white70, size: 18),
                       const SizedBox(width: 8),
                       Text(cat.name, style: TextStyle(color: isSelected ? AppColors.primary : Colors.white70, fontSize: 14)),
                     ],

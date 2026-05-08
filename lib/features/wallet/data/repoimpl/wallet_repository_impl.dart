@@ -48,4 +48,14 @@ class WalletRepositoryImpl implements WalletRepository {
       return Left(e.toString());
     }
   }
+
+  @override
+  Future<Either<String, void>> inviteMember(String walletId, String emailOrUsername, String role) async {
+    try {
+      await remoteDataSource.inviteMember(walletId, emailOrUsername, role);
+      return const Right(null);
+    } catch (e) {
+      return Left(e.toString());
+    }
+  }
 }

@@ -92,10 +92,10 @@ class _BudgetScreenState extends State<BudgetScreen> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        const Column(
+        Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
+            const Text(
               'Budgets',
               style: TextStyle(
                 color: Colors.white,
@@ -105,8 +105,8 @@ class _BudgetScreenState extends State<BudgetScreen> {
               ),
             ),
             Text(
-              'Keep track of your spending',
-              style: TextStyle(color: AppColors.textSecondaryDark, fontSize: 14),
+              '${categories.length} categories tracked',
+              style: const TextStyle(color: AppColors.textSecondaryDark, fontSize: 14),
             ),
           ],
         ),
@@ -161,13 +161,31 @@ class _BudgetScreenState extends State<BudgetScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  '\$${spent.toStringAsFixed(2)} of \$${budget.amountLimit.toStringAsFixed(2)}',
-                  style: TextStyle(color: isOverBudget ? Colors.redAccent : AppColors.textSecondaryDark),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '\$${spent.toStringAsFixed(2)} of \$${budget.amountLimit.toStringAsFixed(2)}',
+                      style: TextStyle(
+                        color: isOverBudget ? Colors.redAccent : AppColors.textSecondaryDark,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    if (isOverBudget)
+                      const Text(
+                        'Over budget!',
+                        style: TextStyle(color: Colors.redAccent, fontSize: 12, fontWeight: FontWeight.bold),
+                      )
+                    else if (percent > 0.8)
+                      const Text(
+                        'Approaching limit',
+                        style: TextStyle(color: Colors.orangeAccent, fontSize: 12, fontWeight: FontWeight.bold),
+                      ),
+                  ],
                 ),
                 Text(
                   '${(percent * 100).toStringAsFixed(0)}%',
-                  style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                  style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
                 ),
               ],
             ),
