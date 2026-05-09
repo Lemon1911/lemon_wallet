@@ -4,15 +4,17 @@ class CategoryEntity extends Equatable {
   final String id;
   final String name;
   final String type;
-  final String icon;
+  final String? icon;       // nullable — Supabase allows null
+  final bool isDefault;     // mirrors is_default column in Supabase
 
   const CategoryEntity({
     required this.id,
     required this.name,
     required this.type,
-    required this.icon,
+    this.icon,
+    this.isDefault = false,
   });
 
   @override
-  List<Object?> get props => [id, name, type, icon];
+  List<Object?> get props => [id, name, type, icon, isDefault];
 }

@@ -12,12 +12,15 @@ class BudgetModel extends BudgetEntity {
 
   factory BudgetModel.fromJson(Map<String, dynamic> json) {
     return BudgetModel(
-      id: json['id'],
-      userId: json['user_id'] ?? '',
-      categoryId: json['category_id'],
-      amountLimit: (json['amount_limit'] as num).toDouble(),
-      period: json['period'],
-      startDate: DateTime.parse(json['start_date']),
+      id: (json['id'] ?? '').toString(),
+      userId: (json['user_id'] ?? '').toString(),
+      categoryId: (json['category_id'] ?? '').toString(),
+      // Handle both numeric (Supabase) and null edge cases safely
+      amountLimit: double.tryParse(json['amount_limit']?.toString() ?? '0') ?? 0.0,
+      period: (json['period'] ?? 'monthly').toString(),
+      startDate: json['start_date'] != null
+          ? DateTime.tryParse(json['start_date'].toString()) ?? DateTime.now()
+          : DateTime.now(),
     );
   }
 

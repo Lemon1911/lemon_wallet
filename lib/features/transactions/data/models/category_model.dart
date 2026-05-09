@@ -5,15 +5,18 @@ class CategoryModel extends CategoryEntity {
     required super.id,
     required super.name,
     required super.type,
-    required super.icon,
+    super.icon,
+    super.isDefault,
   });
 
   factory CategoryModel.fromJson(Map<String, dynamic> json) {
     return CategoryModel(
-      id: json['id'] as String,
-      name: json['name'] as String,
-      type: json['type'] as String,
-      icon: json['icon'] as String,
+      id: (json['id'] ?? '').toString(),
+      name: (json['name'] ?? 'Unnamed').toString(),
+      type: (json['type'] ?? 'expense').toString(),
+      icon: json['icon']?.toString(),             // nullable safe
+      isDefault: json['is_default'] == true ||
+          json['is_default'] == 1,               // works for both bool (Supabase) and int (SQLite)
     );
   }
 
@@ -23,6 +26,7 @@ class CategoryModel extends CategoryEntity {
       'name': name,
       'type': type,
       'icon': icon,
+      'is_default': isDefault ? 1 : 0,           // SQLite stores as int
     };
   }
 }
