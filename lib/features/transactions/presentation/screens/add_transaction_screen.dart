@@ -12,6 +12,7 @@ import '../../../wallet/presentation/bloc/wallet_bloc.dart';
 import '../../../../core/utils/icon_helper.dart';
 import '../../../../core/services/currency_service.dart';
 import '../../../../core/di/service_locator.dart';
+import '../../../wallet/domain/entities/wallet_entity.dart';
 
 class AddTransactionScreen extends StatefulWidget {
   final String walletId;
@@ -160,7 +161,11 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
               builder: (context, state) {
                 String symbol = '\$';
                 if (state is WalletsLoaded) {
-                  final wallet = state.wallets.firstWhere((w) => w.id == widget.walletId, orElse: () => state.wallets.first);
+                  // Fix type mismatch by ensuring firstWhere returns a WalletEntity even if list is List<WalletModel> at runtime
+                  final wallet = state.wallets.cast<WalletEntity>().firstWhere(
+                    (w) => w.id == widget.walletId, 
+                    orElse: () => state.wallets.first,
+                  );
                   symbol = sl<CurrencyService>().getSymbol(wallet.currency);
                 }
                 return Text(symbol, style: const TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.bold));

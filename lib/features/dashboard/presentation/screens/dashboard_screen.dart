@@ -217,7 +217,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           const SizedBox(height: 32),
           const SkeletonLoader(width: 150, height: 24),
           const SizedBox(height: 16),
-          List.generate(5, (_) => SkeletonLoader.listTile()).reduce((a, b) => Column(children: [a, b])),
+          ...List.generate(5, (_) => SkeletonLoader.listTile()),
         ],
       ),
     );
@@ -596,7 +596,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        mainAxisAlignment: MainAxisAlignment.start,
         children: [
           _ActionPill(icon: Icons.send_rounded, label: 'Send'),
           const SizedBox(width: 16),
