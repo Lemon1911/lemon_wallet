@@ -28,13 +28,19 @@ class _CreateWalletScreenState extends State<CreateWalletScreen> {
         title: const Text('Create Wallet', style: TextStyle(color: Colors.white)),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white),
-          onPressed: () => context.pop(),
+          onPressed: () {
+            if (context.canPop()) {
+              context.pop();
+            } else {
+              context.go('/');
+            }
+          },
         ),
       ),
       body: BlocListener<WalletBloc, WalletState>(
         listener: (context, state) {
           if (state is WalletSuccess) {
-            context.pop();
+            if (context.canPop()) context.pop();
             context.read<WalletBloc>().add(LoadWallets());
           } else if (state is WalletError) {
             ScaffoldMessenger.of(context).showSnackBar(

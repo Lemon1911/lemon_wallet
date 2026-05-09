@@ -39,7 +39,13 @@ class _ScannerScreenState extends State<ScannerScreen> {
           title: const Text('Scan Receipt', style: TextStyle(color: Colors.white)),
           leading: IconButton(
             icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white),
-            onPressed: () => context.pop(),
+            onPressed: () {
+              if (context.canPop()) {
+                context.pop();
+              } else {
+                context.go('/');
+              }
+            },
           ),
         ),
         body: BlocConsumer<ScannerBloc, ScannerState>(

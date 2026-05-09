@@ -62,13 +62,19 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
         title: const Text('Add Transaction', style: TextStyle(color: Colors.white)),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white),
-          onPressed: () => context.pop(),
+          onPressed: () {
+            if (context.canPop()) {
+              context.pop();
+            } else {
+              context.go('/');
+            }
+          },
         ),
       ),
       body: BlocListener<TransactionBloc, TransactionState>(
         listener: (context, state) {
           if (state is TransactionSuccess) {
-            context.pop();
+            if (context.canPop()) context.pop();
             context.read<TransactionBloc>().add(LoadTransactions(widget.walletId));
             context.read<WalletBloc>().add(LoadWallets());
           } else if (state is TransactionError) {

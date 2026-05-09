@@ -168,7 +168,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
                         const SizedBox(height: 24),
                         TextButton(
-                          onPressed: () => context.pop(),
+                          onPressed: () {
+                            if (context.canPop()) {
+                              context.pop();
+                            } else {
+                              context.go(AppRouter.login);
+                            }
+                          },
                           child: Text(
                             l10n.alreadyHaveAccount,
                             style: const TextStyle(
