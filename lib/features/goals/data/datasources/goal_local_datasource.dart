@@ -5,8 +5,8 @@ import '../models/goal_model.dart';
 abstract class GoalLocalDataSource {
   Future<List<GoalModel>> getGoals(String userId);
   Future<void> cacheGoals(List<GoalModel> goals, String userId);
-  Future<void> saveGoal(GoalModel goal);
-  Future<void> updateGoalProgress(String goalId, double currentAmount);
+  Future<void> cacheGoal(GoalModel goal);
+  Future<GoalModel> updateGoalProgress(String goalId, double currentAmount);
   Future<void> deleteGoal(String goalId);
 }
 
@@ -40,13 +40,13 @@ class GoalLocalDataSourceImpl implements GoalLocalDataSource {
   }
 
   @override
-  Future<void> saveGoal(GoalModel goal) async {
+  Future<void> cacheGoal(GoalModel goal) async {
     final db = await _dbHelper.database;
     await db.insert('goals', goal.toJson(), conflictAlgorithm: ConflictAlgorithm.replace);
   }
 
   @override
-  Future<void> updateGoalProgress(String goalId, double currentAmount) async {
+  Future<GoalModel> updateGoalProgress(String goalId, double currentAmount) async {
     final db = await _dbHelper.database;
     await db.update(
       'goals',
@@ -54,6 +54,8 @@ class GoalLocalDataSourceImpl implements GoalLocalDataSource {
       where: 'id = ?',
       whereArgs: [goalId],
     );
+    final maps = await db.query('goals', where: 'id = ?', whereArgs: [goalId]);
+    return GoalModel.fromJson(maps.first);
   }
 
   @override

@@ -46,6 +46,12 @@ import '../../features/budget/presentation/bloc/budget_bloc.dart';
 import '../theme/theme_bloc.dart';
 import '../theme/theme_service.dart';
 
+import '../../features/goals/data/datasources/goal_local_datasource.dart';
+import '../../features/goals/data/datasources/goal_remote_datasource.dart';
+import '../../features/goals/data/repositories/goal_repository_impl.dart';
+import '../../features/goals/domain/repositories/goal_repository.dart';
+import '../../features/goals/presentation/bloc/goal_bloc.dart';
+
 final sl = GetIt.instance;
 
 Future<void> init() async {
@@ -153,6 +159,18 @@ Future<void> init() async {
   // Features - Insights
   sl.registerFactory(() => InsightsBloc(aiAdvisorService: sl()));
   sl.registerFactory(() => AiChatBloc(aiAdvisorService: sl()));
+
+  // Features - Goals
+  sl.registerFactory(() => GoalBloc(repository: sl()));
+  sl.registerLazySingleton<GoalRepository>(
+    () => GoalRepositoryImpl(
+      remoteDataSource: sl(),
+      localDataSource: sl(),
+      supabaseClient: sl(),
+    ),
+  );
+  sl.registerLazySingleton<GoalLocalDataSource>(() => GoalLocalDataSourceImpl(sl()));
+  sl.registerLazySingleton<GoalRemoteDataSource>(() => GoalRemoteDataSourceImpl(sl()));
 
   // External
   final sharedPrefs = await SharedPreferences.getInstance();

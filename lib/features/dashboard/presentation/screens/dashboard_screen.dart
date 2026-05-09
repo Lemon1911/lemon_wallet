@@ -24,6 +24,9 @@ import '../../../../core/utils/permission_helper.dart';
 import '../../../../core/services/sms_receiver_service.dart';
 import '../../../../core/services/currency_service.dart';
 import '../../../../core/di/service_locator.dart';
+import '../../../goals/presentation/bloc/goal_bloc.dart';
+import '../../../goals/presentation/bloc/goal_state.dart';
+import '../../../goals/presentation/bloc/goal_event.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -71,6 +74,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             _loadedWalletId = walletId;
             context.read<TransactionBloc>().add(WatchTransactions(walletId));
             context.read<BudgetBloc>().add(LoadBudgets());
+            context.read<GoalBloc>().add(LoadGoals());
           }
         }
       },
@@ -127,6 +131,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         _buildSpendingChart(transactions),
                         const SizedBox(height: 32),
                         _buildBudgetSummary(context, transactions, categories),
+                        const SizedBox(height: 32),
+                        _buildGoalSummary(context),
                         const SizedBox(height: 32),
                         _buildRecentActivity(transactions, categories),
                       ],
@@ -846,6 +852,77 @@ class _DashboardScreenState extends State<DashboardScreen> {
         }),
       ],
     ).animate().fadeIn(delay: 800.ms, duration: 800.ms);
+  }
+
+  Widget _buildGoalSummary(BuildContext context) {
+    return BlocBuilder<GoalBloc, GoalState>(
+      builder: (context, state) {
+        if (state is GoalLoaded && state.goals.isNotEmpty) {
+          final goal = state.goals.first;
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    'Savings Goals',
+                    style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                  GestureDetector(
+                    onTap: () => context.push(AppRouter.goals),
+                    child: const Text('View All', style: TextStyle(color: AppColors.primary, fontSize: 14)),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              GlassCard(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: AppColors.primary.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: const Icon(Icons.flag_rounded, color: AppColors.primary, size: 20),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Text(
+                            goal.title,
+                            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                        Text(
+                          '${(goal.progress * 100).toStringAsFixed(0)}%',
+                          style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(10),
+                      child: LinearProgressIndicator(
+                        value: goal.progress,
+                        minHeight: 6,
+                        backgroundColor: Colors.white.withValues(alpha: 0.05),
+                        valueColor: const AlwaysStoppedAnimation<Color>(AppColors.primary),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          );
+        }
+        return const SizedBox.shrink();
+      },
+    );
   }
 
   // Icon mapping moved to IconHelper

@@ -3,7 +3,8 @@ import '../models/goal_model.dart';
 
 abstract class GoalRemoteDataSource {
   Future<List<GoalModel>> getGoals();
-  Future<GoalModel> saveGoal(GoalModel goal);
+  Future<GoalModel> createGoal(GoalModel goal);
+  Future<GoalModel> updateGoal(GoalModel goal);
   Future<void> updateGoalProgress(String goalId, double currentAmount);
   Future<void> deleteGoal(String goalId);
 }
@@ -27,7 +28,18 @@ class GoalRemoteDataSourceImpl implements GoalRemoteDataSource {
   }
 
   @override
-  Future<GoalModel> saveGoal(GoalModel goal) async {
+  Future<GoalModel> createGoal(GoalModel goal) async {
+    final response = await supabaseClient
+        .from('goals')
+        .upsert(goal.toJson())
+        .select()
+        .single();
+
+    return GoalModel.fromJson(response);
+  }
+
+  @override
+  Future<GoalModel> updateGoal(GoalModel goal) async {
     final response = await supabaseClient
         .from('goals')
         .upsert(goal.toJson())

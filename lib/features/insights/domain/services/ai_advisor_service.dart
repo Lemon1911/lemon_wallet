@@ -43,6 +43,9 @@ class AiAdvisorService {
       return jsonResponse.map((e) => e.toString()).toList();
     } catch (e) {
       debugPrint('AI Insight Error: $e');
+      if (e.toString().contains('quota')) {
+        return ['The AI is currently busy. Please try again in a minute! 🍋'];
+      }
       return ['Keep tracking your expenses to build a healthier financial future!'];
     }
   }
@@ -82,6 +85,14 @@ class AiAdvisorService {
       return jsonResponse.cast<Map<String, dynamic>>();
     } catch (e) {
       debugPrint('AI Goal Suggestion Error: $e');
+      if (e.toString().contains('quota')) {
+        return [{
+          'title': 'AI is resting',
+          'description': 'The Smart CFO is busy right now. Try again in a minute! 🍋',
+          'targetAmount': 0,
+          'type': 'savings'
+        }];
+      }
       return [];
     }
   }

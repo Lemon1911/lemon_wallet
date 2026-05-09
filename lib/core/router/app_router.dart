@@ -11,6 +11,8 @@ import '../../features/profile/presentation/screens/edit_profile_screen.dart';
 import '../../features/budget/presentation/screens/budget_screen.dart';
 import '../../features/insights/presentation/screens/ai_chat_screen.dart';
 import '../../features/profile/presentation/screens/settings_screen.dart';
+import '../../features/goals/presentation/screens/goals_screen.dart';
+import '../../features/goals/presentation/screens/add_goal_screen.dart';
 
 class AppRouter {
   static final GlobalKey<NavigatorState> rootNavigatorKey = GlobalKey<NavigatorState>();
@@ -26,6 +28,8 @@ class AppRouter {
   static const String budgets = '/budgets';
   static const String aiChat = '/ai-chat';
   static const String settings = '/settings';
+  static const String goals = '/goals';
+  static const String addGoal = '/add-goal';
 
   static final router = GoRouter(
     navigatorKey: rootNavigatorKey,
@@ -80,6 +84,14 @@ class AppRouter {
       GoRoute(
         path: settings,
         builder: (context, state) => const SettingsScreen(),
+      ),
+      GoRoute(
+        path: goals,
+        builder: (context, state) => const GoalsScreen(),
+      ),
+      GoRoute(
+        path: addGoal,
+        builder: (context, state) => const AddGoalScreen(),
       ),
     ],
   );
