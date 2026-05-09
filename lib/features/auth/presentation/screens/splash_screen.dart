@@ -34,11 +34,15 @@ class _SplashScreenState extends State<SplashScreen> {
     if (hasCredentials) {
       final isBiometricAvailable = await biometricService.isBiometricAvailable();
       if (isBiometricAvailable) {
-        final authenticated = await biometricService.authenticate();
-        if (authenticated) {
-          if (!mounted) return;
-          context.read<AuthBloc>().add(AuthBiometricLoginRequested());
-          return;
+        try {
+          final authenticated = await biometricService.authenticate();
+          if (authenticated) {
+            if (!mounted) return;
+            context.read<AuthBloc>().add(AuthBiometricLoginRequested());
+            return;
+          }
+        } catch (e) {
+          debugPrint('Biometric authentication error: $e');
         }
       }
     }

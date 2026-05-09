@@ -36,10 +36,11 @@ class InsightsScreen extends StatelessWidget {
                     // We assume the transactions are for the first/selected wallet in real app logic
                     // For now, we'll try to find the wallet that matches the first transaction's walletId
                     if (state.transactions.isNotEmpty) {
-                      final wallet = walletState.wallets.firstWhere(
-                        (w) => w.id == state.transactions.first.walletId,
-                        orElse: () => walletState.wallets.first,
-                      );
+                      final walletId = state.transactions.first.walletId;
+                      // Safer way to find wallet without type-sensitive orElse
+                      final wallet = walletState.wallets.any((w) => w.id == walletId)
+                          ? walletState.wallets.firstWhere((w) => w.id == walletId)
+                          : walletState.wallets.first;
                       currencyCode = wallet.currency;
                     } else {
                       currencyCode = walletState.wallets.first.currency;
