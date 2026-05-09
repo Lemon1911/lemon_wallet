@@ -16,6 +16,20 @@ class LoadTransactions extends TransactionEvent {
   List<Object?> get props => [walletId];
 }
 
+class WatchTransactions extends TransactionEvent {
+  final String walletId;
+  const WatchTransactions(this.walletId);
+  @override
+  List<Object?> get props => [walletId];
+}
+
+class TransactionsUpdated extends TransactionEvent {
+  final List<TransactionEntity> transactions;
+  const TransactionsUpdated(this.transactions);
+  @override
+  List<Object?> get props => [transactions];
+}
+
 class LoadCategories extends TransactionEvent {}
 
 class AddTransaction extends TransactionEvent {

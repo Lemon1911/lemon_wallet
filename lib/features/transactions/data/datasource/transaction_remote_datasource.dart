@@ -18,6 +18,7 @@ abstract class TransactionRemoteDataSource {
   });
 
   Future<void> deleteTransaction(String transactionId);
+  Stream<List<TransactionModel>> watchTransactions({required String walletId});
 }
 
 class TransactionRemoteDataSourceImpl implements TransactionRemoteDataSource {
@@ -71,5 +72,15 @@ class TransactionRemoteDataSourceImpl implements TransactionRemoteDataSource {
   @override
   Future<void> deleteTransaction(String transactionId) async {
     await supabaseClient.from('transactions').delete().eq('id', transactionId);
+  }
+
+  @override
+  Stream<List<TransactionModel>> watchTransactions({required String walletId}) {
+    return supabaseClient
+        .from('transactions')
+        .stream(primaryKey: ['id'])
+        .eq('wallet_id', walletId)
+        .order('transaction_date', ascending: false)
+        .map((list) => list.map((json) => TransactionModel.fromJson(json)).toList());
   }
 }

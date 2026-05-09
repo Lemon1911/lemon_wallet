@@ -4,9 +4,12 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../features/transactions/presentation/bloc/transaction_bloc.dart';
-import '../../../../features/transactions/presentation/bloc/transaction_state.dart';
-import '../../../../features/transactions/domain/entities/transaction_entity.dart';
+import '../../../transactions/presentation/bloc/transaction_state.dart';
+import '../../../transactions/domain/entities/transaction_entity.dart';
 import '../../domain/services/insights_service.dart';
+import '../bloc/insights_bloc.dart';
+import '../bloc/insights_event.dart';
+import '../bloc/insights_state.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../../../../core/widgets/custom_components.dart';
 import '../../../../core/services/currency_service.dart';
@@ -42,6 +45,9 @@ class InsightsScreen extends StatelessWidget {
                       currencyCode = walletState.wallets.first.currency;
                     }
                   }
+                  
+                  // Trigger AI insights generation
+                  context.read<InsightsBloc>().add(GenerateInsights(state.transactions));
                   
                   return _buildContent(context, state.transactions, currencyCode);
                 },
@@ -86,6 +92,10 @@ class InsightsScreen extends StatelessWidget {
                 _buildSectionHeader('AI Recommendations'),
                 const SizedBox(height: 16),
                 _buildAiTips(transactions),
+                const SizedBox(height: 32),
+                _buildSectionHeader('Smart Goals (AI Proposed)'),
+                const SizedBox(height: 16),
+                _buildSmartGoals(),
                 const SizedBox(height: 32),
                 _buildSectionHeader('Monthly Trend'),
                 const SizedBox(height: 16),
@@ -303,30 +313,52 @@ class InsightsScreen extends StatelessWidget {
   }
 
   Widget _buildAiTips(List<TransactionEntity> transactions) {
-    final tips = InsightsService.generateTips(transactions);
-    return Column(
-      children: tips.map((tip) => Padding(
-        padding: const EdgeInsets.only(bottom: 12),
-        child: GlassCard(
-          padding: const EdgeInsets.all(16),
-          borderColor: AppColors.primary.withValues(alpha: 0.3),
-          child: Row(
-            children: [
-              const Icon(Icons.auto_awesome, color: AppColors.primary, size: 24)
-                  .animate(onPlay: (controller) => controller.repeat())
-                  .shimmer(duration: 2.seconds, color: Colors.white.withValues(alpha: 0.2)),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Text(
-                  tip,
-                  style: const TextStyle(color: Colors.white, fontSize: 14, height: 1.4),
+    return BlocBuilder<InsightsBloc, InsightsState>(
+      builder: (context, state) {
+        List<String> tips = [];
+        bool isLoading = false;
+
+        if (state is InsightsLoading) {
+          isLoading = true;
+        } else if (state is InsightsLoaded) {
+          tips = state.insights;
+        } else {
+          // Fallback to rule-based tips while AI is loading or if it fails
+          tips = InsightsService.generateTips(transactions);
+        }
+
+        return Column(
+          children: [
+            if (isLoading)
+              const Center(child: Padding(
+                padding: EdgeInsets.all(20.0),
+                child: CircularProgressIndicator(color: AppColors.primary),
+              )),
+            ...tips.map((tip) => Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: GlassCard(
+                padding: const EdgeInsets.all(16),
+                borderColor: AppColors.primary.withValues(alpha: 0.3),
+                child: Row(
+                  children: [
+                    const Icon(Icons.auto_awesome, color: AppColors.primary, size: 24)
+                        .animate(onPlay: (controller) => controller.repeat())
+                        .shimmer(duration: 2.seconds, color: Colors.white.withValues(alpha: 0.2)),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Text(
+                        tip,
+                        style: const TextStyle(color: Colors.white, fontSize: 14, height: 1.4),
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            ],
-          ),
-        ),
-      )).toList(),
-    ).animate().fadeIn(delay: 500.ms).slideX(begin: 0.1, end: 0);
+            )),
+          ],
+        ).animate().fadeIn(delay: 500.ms).slideX(begin: 0.1, end: 0);
+      },
+    );
   }
 
   Color _getChartColor(int index) {
@@ -338,5 +370,77 @@ class InsightsScreen extends StatelessWidget {
       const Color(0xFFFDCB6E),
     ];
     return colors[index % colors.length];
+  }
+  Widget _buildSmartGoals() {
+    return BlocBuilder<InsightsBloc, InsightsState>(
+      builder: (context, state) {
+        if (state is InsightsLoading) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        if (state is InsightsLoaded && state.suggestedGoals.isNotEmpty) {
+          return Column(
+            children: state.suggestedGoals.map((goal) {
+              final isSavings = goal['type'] == 'savings';
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: GlassCard(
+                  padding: const EdgeInsets.all(16),
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: (isSavings ? AppColors.secondary : AppColors.primary).withValues(alpha: 0.1),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          isSavings ? Icons.savings_rounded : Icons.track_changes_rounded,
+                          color: isSavings ? AppColors.secondary : AppColors.primary,
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              goal['title'] ?? 'Goal',
+                              style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              goal['description'] ?? '',
+                              style: const TextStyle(color: Colors.white70, fontSize: 12),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Text(
+                            '\$${goal['targetAmount']}',
+                            style: TextStyle(
+                              color: isSavings ? AppColors.secondary : AppColors.primary,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const Text(
+                            'Target',
+                            style: TextStyle(color: Colors.white38, fontSize: 10),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            }).toList(),
+          );
+        }
+        return const Center(child: Text('No goals suggested yet.', style: TextStyle(color: Colors.white70)));
+      },
+    );
   }
 }

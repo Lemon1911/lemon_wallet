@@ -1,3 +1,5 @@
+import 'dart:io';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -34,6 +36,26 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
           searchQuery: _searchController.text,
           categoryId: _selectedCategoryId,
         ));
+  }
+
+  Future<void> _importCsv(BuildContext context) async {
+    final result = await FilePicker.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: ['csv'],
+    );
+
+    if (result != null && result.files.single.path != null) {
+      final file = File(result.files.single.path!);
+      final transactionsData = await CsvHelper.importTransactionsFromCsv(file);
+      
+      if (!context.mounted) return;
+
+      if (transactionsData.isNotEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Imported ${transactionsData.length} entries. Processing...')),
+        );
+      }
+    }
   }
 
   @override
@@ -137,6 +159,10 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
         ),
         Row(
           children: [
+            IconButton(
+              icon: const Icon(Icons.file_upload_rounded, color: AppColors.primary),
+              onPressed: () => _importCsv(context),
+            ),
             IconButton(
               icon: const Icon(Icons.ios_share_rounded, color: AppColors.primary),
               onPressed: () => CsvHelper.exportTransactionsToCsv(transactions),

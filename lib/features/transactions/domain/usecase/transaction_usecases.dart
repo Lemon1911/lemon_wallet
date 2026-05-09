@@ -50,3 +50,13 @@ class GetCategoriesUseCase {
     return repository.getCategories();
   }
 }
+
+class WatchTransactionsUseCase {
+  final TransactionRepository repository;
+
+  WatchTransactionsUseCase(this.repository);
+
+  Stream<List<TransactionEntity>> call({required String walletId}) {
+    return repository.watchTransactions(walletId: walletId);
+  }
+}

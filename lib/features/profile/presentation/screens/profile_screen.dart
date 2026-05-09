@@ -107,14 +107,9 @@ class ProfileScreen extends StatelessWidget {
                       onTap: () => context.push(AppRouter.editProfile),
                     ),
                     _buildGlassTile(
-                      icon: Icons.notifications_none,
-                      title: 'Notifications',
-                      onTap: () {},
-                    ),
-                    _buildGlassTile(
-                      icon: Icons.security_outlined,
-                      title: 'Privacy & Security',
-                      onTap: () {},
+                      icon: Icons.settings_suggest_rounded,
+                      title: 'Smart Settings',
+                      onTap: () => context.push(AppRouter.settings),
                     ),
                     
                     const SizedBox(height: 32),

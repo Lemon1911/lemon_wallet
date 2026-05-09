@@ -50,9 +50,29 @@ class WalletRepositoryImpl implements WalletRepository {
   }
 
   @override
-  Future<Either<String, void>> inviteMember(String walletId, String emailOrUsername, String role) async {
+  Future<Either<String, void>> inviteMember(String walletId, String email, String role) async {
     try {
-      await remoteDataSource.inviteMember(walletId, emailOrUsername, role);
+      await remoteDataSource.inviteMember(walletId, email, role);
+      return const Right(null);
+    } catch (e) {
+      return Left(e.toString());
+    }
+  }
+
+  @override
+  Future<Either<String, List<Map<String, dynamic>>>> getPendingInvites() async {
+    try {
+      final invites = await remoteDataSource.getPendingInvites();
+      return Right(invites);
+    } catch (e) {
+      return Left(e.toString());
+    }
+  }
+
+  @override
+  Future<Either<String, void>> respondToInvite(String invitationId, bool accept) async {
+    try {
+      await remoteDataSource.respondToInvite(invitationId, accept);
       return const Right(null);
     } catch (e) {
       return Left(e.toString());

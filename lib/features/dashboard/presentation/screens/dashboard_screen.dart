@@ -6,6 +6,7 @@ import '../../../../core/utils/icon_helper.dart';
 import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/custom_components.dart';
+import '../../../../core/widgets/skeleton_loaders.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../../auth/presentation/bloc/auth_state.dart';
 import '../../../wallet/domain/entities/wallet_entity.dart';
@@ -19,6 +20,8 @@ import '../../../transactions/domain/entities/category_entity.dart';
 import '../../../budget/presentation/bloc/budget_bloc.dart';
 import '../../../budget/presentation/bloc/budget_state.dart';
 import '../../../budget/presentation/bloc/budget_event.dart';
+import '../../../../core/utils/permission_helper.dart';
+import '../../../../core/services/sms_receiver_service.dart';
 import '../../../../core/services/currency_service.dart';
 import '../../../../core/di/service_locator.dart';
 
@@ -32,6 +35,26 @@ class DashboardScreen extends StatefulWidget {
 class _DashboardScreenState extends State<DashboardScreen> {
   int _selectedWalletIndex = 0;
   String? _loadedWalletId;
+  bool _hasPermissions = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkPermissions();
+  }
+
+  Future<void> _checkPermissions() async {
+    final granted = await PermissionHelper.hasAllPermissions();
+    if (granted) {
+      await SmsReceiverService.startListening();
+    }
+    if (mounted) {
+      setState(() {
+        _hasPermissions = granted;
+      });
+      context.read<WalletBloc>().add(LoadInvites());
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -46,7 +69,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           final walletId = state.wallets[_selectedWalletIndex].id;
           if (_loadedWalletId != walletId) {
             _loadedWalletId = walletId;
-            context.read<TransactionBloc>().add(LoadTransactions(walletId));
+            context.read<TransactionBloc>().add(WatchTransactions(walletId));
             context.read<BudgetBloc>().add(LoadBudgets());
           }
         }
@@ -62,6 +85,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
         return BlocBuilder<TransactionBloc, TransactionState>(
           builder: (context, txState) {
+            if (txState is TransactionLoading) {
+              return _buildLoadingState();
+            }
             List<TransactionEntity> transactions = [];
             List<CategoryEntity> categories = [];
             
@@ -79,6 +105,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     if (_loadedWalletId != null) {
                       context.read<TransactionBloc>().add(LoadTransactions(_loadedWalletId!));
                     }
+                    await _checkPermissions();
                   },
                   child: SingleChildScrollView(
                     physics: const AlwaysScrollableScrollPhysics(),
@@ -87,6 +114,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         _buildHeader(context),
+                        if (!_hasPermissions) ...[
+                          const SizedBox(height: 24),
+                          _buildSmartSetupBanner(context),
+                        ],
                         const SizedBox(height: 32),
                         if (state is WalletsLoaded)
                           _buildBalanceSection(transactions, state.wallets),
@@ -107,6 +138,88 @@ class _DashboardScreenState extends State<DashboardScreen> {
           },
         );
       },
+    );
+  }
+
+  Widget _buildSmartSetupBanner(BuildContext context) {
+    return GlassCard(
+      padding: const EdgeInsets.all(16),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: AppColors.primary.withValues(alpha: 0.1),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(Icons.auto_awesome_rounded, color: AppColors.primary, size: 24),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Enable Smart Tracking',
+                  style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
+                ),
+                Text(
+                  'Automatically track expenses from SMS alerts.',
+                  style: TextStyle(color: AppColors.textSecondaryDark, fontSize: 13),
+                ),
+              ],
+            ),
+          ),
+          TextButton(
+            onPressed: () async {
+              final granted = await PermissionHelper.requestSmsAndNotificationPermissions();
+              if (granted) {
+                await SmsReceiverService.startListening();
+                setState(() => _hasPermissions = true);
+              }
+            },
+            child: const Text('Setup', style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold)),
+          ),
+        ],
+      ),
+    ).animate().slideX(begin: 0.1).fadeIn();
+  }
+
+  Widget _buildLoadingState() {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.fromLTRB(24, 60, 24, 120),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SkeletonLoader(width: 100, height: 20),
+                  SizedBox(height: 8),
+                  SkeletonLoader(width: 150, height: 30),
+                ],
+              ),
+              const SkeletonLoader(width: 50, height: 50, borderRadius: BorderRadius.all(Radius.circular(25))),
+            ],
+          ),
+          const SizedBox(height: 32),
+          SkeletonLoader.card(height: 180),
+          const SizedBox(height: 32),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: List.generate(4, (_) => const SkeletonLoader(width: 70, height: 90)),
+          ),
+          const SizedBox(height: 32),
+          SkeletonLoader.card(height: 200),
+          const SizedBox(height: 32),
+          const SkeletonLoader(width: 150, height: 24),
+          const SizedBox(height: 16),
+          List.generate(5, (_) => SkeletonLoader.listTile()).reduce((a, b) => Column(children: [a, b])),
+        ],
+      ),
     );
   }
 
@@ -183,30 +296,124 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 ),
               ],
             ),
-            GestureDetector(
-              onTap: () {
-                // Navigate to profile tab
-              },
-              child: Container(
-                width: 50,
-                height: 50,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: AppColors.primary.withValues(alpha: 0.3),
-                    width: 2,
-                  ),
-                  image: const DecorationImage(
-                    image: AssetImage('assets/images/logo_cyan.png'),
-                    fit: BoxFit.cover,
+            Row(
+              children: [
+                BlocBuilder<WalletBloc, WalletState>(
+                  builder: (context, state) {
+                    if (state is WalletsLoaded && state.pendingInvites.isNotEmpty) {
+                      return Stack(
+                        children: [
+                          IconButton(
+                            icon: const Icon(Icons.notifications_none_rounded, color: Colors.white),
+                            onPressed: () => _showInvitationsDialog(context, state.pendingInvites),
+                          ),
+                          Positioned(
+                            right: 12,
+                            top: 12,
+                            child: Container(
+                              width: 8,
+                              height: 8,
+                              decoration: const BoxDecoration(
+                                color: AppColors.primary,
+                                shape: BoxShape.circle,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ).animate().shake();
+                    }
+                    return const SizedBox.shrink();
+                  },
+                ),
+                IconButton(
+                  icon: const Icon(Icons.auto_awesome_rounded, color: AppColors.primary),
+                  onPressed: () => context.push(AppRouter.aiChat),
+                ),
+                const SizedBox(width: 8),
+                GestureDetector(
+                  onTap: () {
+                    // Navigate to profile tab
+                  },
+                  child: Container(
+                    width: 50,
+                    height: 50,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: AppColors.primary.withValues(alpha: 0.3),
+                        width: 2,
+                      ),
+                      image: const DecorationImage(
+                        image: AssetImage('assets/images/logo_cyan.png'),
+                        fit: BoxFit.cover,
+                      ),
+                    ),
                   ),
                 ),
-              ),
+              ],
             ),
           ],
         );
       },
     ).animate().fadeIn(duration: 600.ms).slideY(begin: -0.2, end: 0);
+  }
+
+  void _showInvitationsDialog(BuildContext context, List<Map<String, dynamic>> invites) {
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        backgroundColor: Colors.transparent,
+        child: GlassCard(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text(
+                'Wallet Invitations',
+                style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 16),
+              ...invites.map((invite) {
+                final walletName = invite['wallets']['name'];
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          'Invite to "$walletName"',
+                          style: const TextStyle(color: Colors.white),
+                        ),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.check, color: AppColors.primary),
+                        onPressed: () {
+                          context.read<WalletBloc>().add(RespondToInvite(
+                            invitationId: invite['id'],
+                            accept: true,
+                          ));
+                          Navigator.pop(context);
+                        },
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.close, color: AppColors.error),
+                        onPressed: () {
+                          context.read<WalletBloc>().add(RespondToInvite(
+                            invitationId: invite['id'],
+                            accept: false,
+                          ));
+                          Navigator.pop(context);
+                        },
+                      ),
+                    ],
+                  ),
+                );
+              }),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   Widget _buildBalanceSection(List<TransactionEntity> transactions, List<WalletEntity> wallets) {
@@ -324,7 +531,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             _selectedWalletIndex = index;
                             _loadedWalletId = wallet.id;
                           });
-                          context.read<TransactionBloc>().add(LoadTransactions(wallet.id));
+                          context.read<TransactionBloc>().add(WatchTransactions(wallet.id));
                           Navigator.pop(context);
                         },
                         child: GlassCard(

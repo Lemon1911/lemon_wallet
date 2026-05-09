@@ -5,7 +5,9 @@ abstract class WalletRemoteDataSource {
   Future<List<WalletModel>> getWallets();
   Future<WalletModel> createWallet({required String name, required String currency});
   Future<void> deleteWallet(String walletId);
-  Future<void> inviteMember(String walletId, String emailOrUsername, String role);
+  Future<void> inviteMember(String walletId, String email, String role);
+  Future<List<Map<String, dynamic>>> getPendingInvites();
+  Future<void> respondToInvite(String invitationId, bool accept);
 }
 
 class WalletRemoteDataSourceImpl implements WalletRemoteDataSource {
@@ -39,21 +41,35 @@ class WalletRemoteDataSourceImpl implements WalletRemoteDataSource {
   }
 
   @override
-  Future<void> inviteMember(String walletId, String emailOrUsername, String role) async {
-    // 1. Find the user
-    final userResponse = await supabaseClient
-        .from('users')
-        .select('id')
-        .or('username.eq.$emailOrUsername,full_name.eq.$emailOrUsername') // Simplified lookup
-        .single();
-    
-    final targetUserId = userResponse['id'];
-
-    // 2. Insert into wallet_members
-    await supabaseClient.from('wallet_members').insert({
+  Future<void> inviteMember(String walletId, String email, String role) async {
+    await supabaseClient.from('wallet_invitations').insert({
       'wallet_id': walletId,
-      'user_id': targetUserId,
+      'invited_email': email,
       'role': role,
+      'status': 'pending',
     });
+  }
+
+  @override
+  Future<List<Map<String, dynamic>>> getPendingInvites() async {
+    final response = await supabaseClient
+        .from('wallet_invitations')
+        .select('*, wallets(name, currency)')
+        .eq('status', 'pending');
+    return response;
+  }
+
+  @override
+  Future<void> respondToInvite(String invitationId, bool accept) async {
+    if (accept) {
+      await supabaseClient.rpc('accept_wallet_invitation', params: {
+        'invitation_id': invitationId,
+      });
+    } else {
+      await supabaseClient
+          .from('wallet_invitations')
+          .update({'status': 'rejected'})
+          .eq('id', invitationId);
+    }
   }
 }

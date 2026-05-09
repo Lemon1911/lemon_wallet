@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../domain/entities/transaction_entity.dart';
 import '../../domain/entities/category_entity.dart';
@@ -9,6 +10,9 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
   final GetTransactionsUseCase _getTransactionsUseCase;
   final AddTransactionUseCase _addTransactionUseCase;
   final GetCategoriesUseCase _getCategoriesUseCase;
+  final WatchTransactionsUseCase _watchTransactionsUseCase;
+  
+  StreamSubscription? _transactionSubscription;
   
   List<CategoryEntity>? _cachedCategories;
   List<TransactionEntity> _allTransactions = [];
@@ -17,14 +21,24 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
     required GetTransactionsUseCase getTransactionsUseCase,
     required AddTransactionUseCase addTransactionUseCase,
     required GetCategoriesUseCase getCategoriesUseCase,
+    required WatchTransactionsUseCase watchTransactionsUseCase,
   })  : _getTransactionsUseCase = getTransactionsUseCase,
         _addTransactionUseCase = addTransactionUseCase,
         _getCategoriesUseCase = getCategoriesUseCase,
+        _watchTransactionsUseCase = watchTransactionsUseCase,
         super(TransactionInitial()) {
     on<LoadTransactions>(_onLoadTransactions);
+    on<WatchTransactions>(_onWatchTransactions);
+    on<TransactionsUpdated>(_onTransactionsUpdated);
     on<LoadCategories>(_onLoadCategories);
     on<AddTransaction>(_onAddTransaction);
     on<FilterTransactions>(_onFilterTransactions);
+  }
+
+  @override
+  Future<void> close() {
+    _transactionSubscription?.cancel();
+    return super.close();
   }
 
   Future<void> _onLoadCategories(
@@ -64,6 +78,18 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
         emit(TransactionsLoaded(transactions, _cachedCategories ?? []));
       },
     );
+  }
+
+  Future<void> _onWatchTransactions(WatchTransactions event, Emitter<TransactionState> emit) async {
+    _transactionSubscription?.cancel();
+    _transactionSubscription = _watchTransactionsUseCase(walletId: event.walletId).listen((transactions) {
+      add(TransactionsUpdated(transactions));
+    });
+  }
+
+  void _onTransactionsUpdated(TransactionsUpdated event, Emitter<TransactionState> emit) {
+    _allTransactions = event.transactions;
+    emit(TransactionsLoaded(event.transactions, _cachedCategories ?? []));
   }
 
   void _onFilterTransactions(FilterTransactions event, Emitter<TransactionState> emit) {

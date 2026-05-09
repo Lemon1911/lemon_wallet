@@ -16,16 +16,25 @@ import '../../features/wallet/data/repoimpl/wallet_repository_impl.dart';
 import '../../features/wallet/domain/repo/wallet_repository.dart';
 import '../../features/wallet/domain/usecase/wallet_usecases.dart';
 import '../../features/wallet/domain/usecases/invite_member_usecase.dart';
+import '../../features/wallet/domain/usecases/get_pending_invites_usecase.dart';
+import '../../features/wallet/domain/usecases/respond_to_invite_usecase.dart';
 import '../../features/wallet/presentation/bloc/wallet_bloc.dart';
 import '../../features/scanner/domain/repo/scanner_repository.dart';
 import '../../features/scanner/data/repoimpl/scanner_repository_impl.dart';
 import '../../features/scanner/presentation/bloc/scanner_bloc.dart';
+import '../../features/insights/domain/services/ai_advisor_service.dart';
+import '../../features/insights/presentation/bloc/insights_bloc.dart';
+import '../../features/insights/presentation/bloc/ai_chat_bloc.dart';
 import '../services/biometric_service.dart';
 import '../services/secure_storage_service.dart';
+import '../services/notification_service.dart';
+import '../services/preference_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../features/transactions/data/datasource/transaction_local_datasource.dart';
 import '../../features/wallet/data/datasource/wallet_local_datasource.dart';
 import '../database/database_helper.dart';
 import '../services/currency_service.dart';
+import '../constants/app_constants.dart';
 
 import '../../features/budget/data/datasources/budget_local_datasource.dart';
 import '../../features/budget/data/datasources/budget_remote_datasource.dart';
@@ -48,6 +57,8 @@ Future<void> init() async {
   sl.registerLazySingleton(() => BiometricService());
   sl.registerLazySingleton(() => SecureStorageService());
   sl.registerLazySingleton(() => CurrencyService());
+  sl.registerLazySingleton(() => NotificationService());
+  sl.registerLazySingleton(() => AiAdvisorService(AppConstants.geminiApiKey));
 
   // Features - Theme
   sl.registerFactory(() => ThemeBloc(themeService: sl()));
@@ -73,9 +84,11 @@ Future<void> init() async {
         getTransactionsUseCase: sl(),
         addTransactionUseCase: sl(),
         getCategoriesUseCase: sl(),
+        watchTransactionsUseCase: sl(),
       ));
   sl.registerLazySingleton(() => AddTransactionUseCase(sl()));
   sl.registerLazySingleton(() => GetTransactionsUseCase(sl()));
+  sl.registerLazySingleton(() => WatchTransactionsUseCase(sl()));
   sl.registerLazySingleton(() => GetCategoriesUseCase(sl()));
   sl.registerLazySingleton<TransactionRepository>(
     () => TransactionRepositoryImpl(sl(), sl()),
@@ -92,10 +105,14 @@ Future<void> init() async {
         getWalletsUseCase: sl(),
         createWalletUseCase: sl(),
         inviteMemberUseCase: sl(),
+        getPendingInvitesUseCase: sl(),
+        respondToInviteUseCase: sl(),
       ));
   sl.registerLazySingleton(() => CreateWalletUseCase(sl()));
   sl.registerLazySingleton(() => GetWalletsUseCase(sl()));
   sl.registerLazySingleton(() => InviteMemberUseCase(sl()));
+  sl.registerLazySingleton(() => GetPendingInvitesUseCase(sl()));
+  sl.registerLazySingleton(() => RespondToInviteUseCase(sl()));
   sl.registerLazySingleton<WalletRepository>(
     () => WalletRepositoryImpl(sl(), sl()),
   );
@@ -133,6 +150,13 @@ Future<void> init() async {
     () => BudgetRemoteDataSourceImpl(sl()),
   );
 
+  // Features - Insights
+  sl.registerFactory(() => InsightsBloc(aiAdvisorService: sl()));
+  sl.registerFactory(() => AiChatBloc(aiAdvisorService: sl()));
+
   // External
+  final sharedPrefs = await SharedPreferences.getInstance();
+  sl.registerLazySingleton(() => sharedPrefs);
+  sl.registerLazySingleton(() => PreferenceService(sl()));
   sl.registerLazySingleton(() => Supabase.instance.client);
 }

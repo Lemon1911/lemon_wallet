@@ -81,4 +81,12 @@ class TransactionRepositoryImpl implements TransactionRepository {
       return Left(e.toString());
     }
   }
+
+  @override
+  Stream<List<TransactionEntity>> watchTransactions({required String walletId}) {
+    return remoteDataSource.watchTransactions(walletId: walletId).map((transactions) {
+      localDataSource.cacheTransactions(transactions);
+      return transactions;
+    });
+  }
 }

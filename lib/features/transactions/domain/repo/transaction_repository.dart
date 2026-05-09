@@ -20,4 +20,5 @@ abstract class TransactionRepository {
   });
 
   Future<Either<String, void>> deleteTransaction(String transactionId);
+  Stream<List<TransactionEntity>> watchTransactions({required String walletId});
 }
